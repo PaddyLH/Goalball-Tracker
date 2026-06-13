@@ -32,24 +32,26 @@ jobs:
         run: |
           set -euo pipefail
           PUBLISH_DIR="${PAGES_PUBLISH_DIR:-.}"
+          STAGE_DIR="$RUNNER_TEMP/pages-site"
 
           if [ ! -d "$PUBLISH_DIR" ]; then
             echo "Configured PAGES_PUBLISH_DIR does not exist: $PUBLISH_DIR"
             exit 1
           fi
 
-          mkdir -p _site
-          cp -R "$PUBLISH_DIR"/. _site/
+          rm -rf "$STAGE_DIR"
+          mkdir -p "$STAGE_DIR"
+          cp -R "$PUBLISH_DIR"/. "$STAGE_DIR"/
 
           # Ensure Pages serves static assets exactly as-is.
-          touch _site/.nojekyll
+          touch "$STAGE_DIR/.nojekyll"
 
           if [ -n "${PAGES_CUSTOM_DOMAIN:-}" ]; then
-            printf "%s\n" "$PAGES_CUSTOM_DOMAIN" > _site/CNAME
+            printf "%s\n" "$PAGES_CUSTOM_DOMAIN" > "$STAGE_DIR/CNAME"
             echo "Using custom domain: $PAGES_CUSTOM_DOMAIN"
           fi
 
-          echo "publish_dir=_site" >> "$GITHUB_OUTPUT"
+          echo "publish_dir=$STAGE_DIR" >> "$GITHUB_OUTPUT"
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
