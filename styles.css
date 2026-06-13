@@ -209,6 +209,24 @@ button.hidden {
   margin-bottom: 0.65rem;
 }
 
+.control-strip {
+  display: flex;
+  gap: 0.55rem;
+  flex-wrap: wrap;
+}
+
+.subs-panel {
+  margin-top: 0.75rem;
+  display: grid;
+  gap: 0.7rem;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  align-items: end;
+  border: 1px dashed var(--line);
+  border-radius: 12px;
+  background: var(--surface-2);
+  padding: 0.7rem;
+}
+
 .path-input {
   display: grid;
   gap: 0.8rem;
@@ -238,6 +256,19 @@ button.hidden {
 .choice-row {
   min-width: 280px;
   grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+}
+
+#shooterRow.choice-row {
+  grid-template-columns: repeat(3, minmax(100px, 1fr));
+}
+
+#resultRow.choice-row {
+  grid-template-columns: repeat(3, minmax(84px, 1fr));
+}
+
+#toRow.path-row {
+  grid-template-columns: repeat(8, minmax(40px, 1fr));
+  min-width: 360px;
 }
 
 .path-select-btn {
@@ -281,10 +312,7 @@ button.hidden {
 }
 
 .path-actions {
-  display: flex;
-  gap: 0.65rem;
-  align-items: center;
-  flex-wrap: wrap;
+  display: block;
 }
 
 .path-preview {
@@ -376,9 +404,19 @@ thead th {
     grid-template-columns: repeat(7, minmax(34px, 1fr));
   }
 
+  #toRow.path-row {
+    min-width: 320px;
+    grid-template-columns: repeat(8, minmax(34px, 1fr));
+  }
+
   .choice-row {
     min-width: 260px;
     grid-template-columns: repeat(3, minmax(74px, 1fr));
+  }
+
+  #shooterRow.choice-row {
+    min-width: 260px;
+    grid-template-columns: repeat(3, minmax(86px, 1fr));
   }
 
   .path-select-btn {

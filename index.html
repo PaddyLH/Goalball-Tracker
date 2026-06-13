@@ -81,38 +81,45 @@
 
       <section class="card quick-controls">
         <h2>Quick Settings</h2>
-        <div class="grid two">
+        <div class="control-strip">
+          <button id="switchTeam" type="button" class="outline">Tracking: Our Team</button>
+          <button id="swapBack" type="button" class="outline">Swap Back</button>
+          <button id="toggleSubs" type="button" class="outline">Substitution</button>
+          <button id="undoShot" type="button" class="outline">Undo Last</button>
+        </div>
+
+        <div id="subsPanel" class="subs-panel hidden" aria-label="Substitution controls">
           <label>
             Team
-            <select id="shotTeam">
+            <select id="subTeam">
               <option value="our">Our Team</option>
               <option value="opponent">Opponent</option>
             </select>
           </label>
-          <div>
-            <p class="path-label">Result</p>
-            <div class="path-row-wrap">
-              <div id="resultRow" class="path-row choice-row" role="group" aria-label="Result selection"></div>
-            </div>
-          </div>
-          <div>
-            <p class="path-label">Shooter</p>
-            <div class="path-row-wrap">
-              <div id="playerRow" class="path-row choice-row" role="group" aria-label="Player selection"></div>
-            </div>
-          </div>
-          <div class="actions controls-end">
-            <button id="undoShot" type="button" class="outline">Undo Last</button>
-          </div>
+          <label>
+            Player Off
+            <select id="subOff"></select>
+          </label>
+          <label>
+            Player On
+            <select id="subOn"></select>
+          </label>
+          <button id="applySub" type="button">Apply Substitution</button>
         </div>
       </section>
 
       <section class="card">
         <div class="table-head">
-          <h2>Shot Input (2x7)</h2>
-          <p>Select From and To, then add shot</p>
+          <h2>Shot Input</h2>
+          <p>Complete all rows to auto-submit</p>
         </div>
         <div class="path-input" aria-label="Shot path input controls">
+          <div class="path-group">
+            <p class="path-label">Shooter (On Court)</p>
+            <div class="path-row-wrap">
+              <div id="shooterRow" class="path-row choice-row" role="group" aria-label="Shooter selection"></div>
+            </div>
+          </div>
           <div class="path-group">
             <p class="path-label">From (1-7)</p>
             <div class="path-row-wrap">
@@ -120,14 +127,19 @@
             </div>
           </div>
           <div class="path-group">
-            <p class="path-label">To (1-7)</p>
+            <p class="path-label">Hit (1-7 + Out)</p>
             <div class="path-row-wrap">
               <div id="toRow" class="path-row" role="group" aria-label="To selection"></div>
             </div>
           </div>
+          <div class="path-group">
+            <p class="path-label">Result</p>
+            <div class="path-row-wrap">
+              <div id="resultRow" class="path-row choice-row" role="group" aria-label="Result selection"></div>
+            </div>
+          </div>
           <div class="path-actions">
-            <p id="pathPreview" class="path-preview">Selected: -</p>
-            <button id="addShot" type="button">Add Shot</button>
+            <p id="pathPreview" class="path-preview">Pending: choose shooter, from, hit, result</p>
           </div>
         </div>
       </section>
