@@ -115,3 +115,5 @@ Use **Export CSV** or **Export JSON** after the game.
 - All game data stays on the current device/browser profile unless exported.
 - To clear and start over, use **New Game**.
 - For multi-game history, add a game list page later and store multiple sessions.
+- The app checks for updates on load and reloads when a new version is available.
+- If an installed iPad copy still shows an old version, remove it from the Home Screen and add it again after the newest deploy.

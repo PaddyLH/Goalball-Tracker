@@ -249,6 +249,10 @@ button.hidden {
   gap: 0.45rem;
 }
 
+.path-group.hidden {
+  display: none;
+}
+
 .path-row-wrap {
   overflow-x: auto;
 }

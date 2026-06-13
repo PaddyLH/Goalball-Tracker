@@ -1,7 +1,8 @@
 const STORAGE_KEY = "live-shot-tracker-v4";
 const APP_VERSION = "4.0.0";
 
-const RESULT_OPTIONS = ["Goal", "Blocked", "Out"];
+const RESULT_OPTIONS = ["Goal", "Blocked", "Out", "Penalty"];
+const PENALTY_TYPES = ["10s", "High", "Long", "Other"];
 const OUTCOME_OPTIONS = ["Highball", "Longball"];
 const OUR_ROSTER_DEFAULT = ["Player 1", "Player 2", "Player 3", "Player 4", "Player 5", "Player 6"];
 const OPP_ROSTER_DEFAULT = ["Opp 1", "Opp 2", "Opp 3", "Opp 4", "Opp 5", "Opp 6"];
@@ -44,6 +45,7 @@ const initialState = {
     shotFrom: null,
     shotTo: null,
     result: null,
+    penaltyType: null,
     outcome: null,
     extras: {
       phase: "",
@@ -71,6 +73,7 @@ const els = {
   opponent: document.getElementById("opponent"),
   venue: document.getElementById("venue"),
   analyst: document.getElementById("analyst"),
+    penaltyType: state.controls.result === "Penalty" ? state.controls.penaltyType : "",
   matchLabel: document.getElementById("matchLabel"),
   ourRosterInputs: document.getElementById("ourRosterInputs"),
   oppRosterInputs: document.getElementById("oppRosterInputs"),
@@ -99,6 +102,8 @@ const els = {
   fromRow: document.getElementById("fromRow"),
   toRow: document.getElementById("toRow"),
   resultRow: document.getElementById("resultRow"),
+  penaltyPanel: document.getElementById("penaltyPanel"),
+  penaltyRow: document.getElementById("penaltyRow"),
   outcomeRow: document.getElementById("outcomeRow"),
   shotSideLabel: document.getElementById("shotSideLabel"),
   pathPreview: document.getElementById("pathPreview"),
@@ -221,6 +226,7 @@ function buildInputRows() {
   buildFromRow();
   buildToRow();
   buildResultRow();
+  buildPenaltyRow();
   buildOutcomeRow();
 }
 
@@ -238,6 +244,10 @@ function buildToRow() {
 
 function buildResultRow() {
   refreshRowButtons(els.resultRow, RESULT_OPTIONS, "result", onSelectResult);
+}
+
+function buildPenaltyRow() {
+  refreshRowButtons(els.penaltyRow, PENALTY_TYPES, "penaltyType", onSelectPenaltyType);
 }
 
 function buildOutcomeRow() {
@@ -337,6 +347,14 @@ function onSelectTo(value) {
 
 function onSelectResult(value) {
   state.controls.result = value;
+  if (value !== "Penalty") {
+    state.controls.penaltyType = null;
+  }
+  onControlUpdate();
+}
+
+function onSelectPenaltyType(value) {
+  state.controls.penaltyType = value;
   onControlUpdate();
 }
 
@@ -358,6 +376,7 @@ function maybeAutoSubmitShot() {
     && Number.isInteger(state.controls.shotFrom)
     && (Number.isInteger(state.controls.shotTo) || state.controls.shotTo === "Out")
     && Boolean(state.controls.result)
+    && (state.controls.result !== "Penalty" || Boolean(state.controls.penaltyType))
     && Boolean(state.controls.outcome);
 
   if (!ready || !state.game.started) return;
@@ -380,6 +399,7 @@ function submitShot() {
     to: state.controls.shotTo,
     path: `${state.controls.shotFrom}->${state.controls.shotTo}`,
     result: state.controls.result,
+    penaltyType: state.controls.result === "Penalty" ? state.controls.penaltyType : "",
     outcome: state.controls.outcome,
     extras: { ...state.controls.extras },
     createdAt: new Date().toISOString(),
@@ -398,6 +418,7 @@ function resetShotControls() {
   state.controls.shotFrom = null;
   state.controls.shotTo = null;
   state.controls.result = null;
+  state.controls.penaltyType = null;
   state.controls.outcome = null;
   state.controls.extras = buildEmptyExtras();
 }
@@ -642,7 +663,9 @@ function renderShotRows() {
   highlightSelection(els.fromRow, state.controls.shotFrom, "value");
   highlightSelection(els.toRow, state.controls.shotTo, "value");
   highlightSelection(els.resultRow, state.controls.result, "value");
+  highlightSelection(els.penaltyRow, state.controls.penaltyType, "value");
   highlightSelection(els.outcomeRow, state.controls.outcome, "value");
+  els.penaltyPanel.classList.toggle("hidden", state.controls.result !== "Penalty");
 }
 
 function renderExtraFieldsPanel() {
@@ -683,6 +706,7 @@ function renderInputSelection() {
   const from = Number.isInteger(state.controls.shotFrom) ? state.controls.shotFrom : "-";
   const to = (Number.isInteger(state.controls.shotTo) || state.controls.shotTo === "Out") ? state.controls.shotTo : "-";
   const result = state.controls.result || "-";
+  const penaltyType = state.controls.result === "Penalty" ? (state.controls.penaltyType || "-") : "-";
   const outcome = state.controls.outcome || "-";
 
   const extraSummary = EXTRA_FIELDS
@@ -691,8 +715,8 @@ function renderInputSelection() {
     .join(" | ");
 
   els.pathPreview.textContent = extraSummary
-    ? `Pending: ${shooter} | ${from}->${to} | ${result} | ${outcome} | ${extraSummary}`
-    : `Pending: ${shooter} | ${from}->${to} | ${result} | ${outcome}`;
+    ? `Pending: ${shooter} | ${from}->${to} | ${result} | ${penaltyType} | ${outcome} | ${extraSummary}`
+    : `Pending: ${shooter} | ${from}->${to} | ${result} | ${penaltyType} | ${outcome}`;
 }
 
 function renderShots() {
@@ -705,13 +729,14 @@ function renderShots() {
         <td>${escapeHtml(shot.player || "-")}</td>
         <td>${escapeHtml(shot.path || "-")}</td>
         <td>${escapeHtml(shot.result || "-")}</td>
+        <td>${escapeHtml(shot.penaltyType || "-")}</td>
         <td>${escapeHtml(shot.outcome || "-")}</td>
         <td>${escapeHtml(detailText)}</td>
       </tr>
     `;
   }).join("");
 
-  els.shotTableBody.innerHTML = rows || `<tr><td colspan="7">No shots recorded yet.</td></tr>`;
+  els.shotTableBody.innerHTML = rows || `<tr><td colspan="8">No shots recorded yet.</td></tr>`;
   els.shotCount.textContent = `${state.shots.length} shot${state.shots.length === 1 ? "" : "s"}`;
 }
 
@@ -772,6 +797,12 @@ function renderReportSummary() {
   lines.push("<h3>By Outcome</h3>");
   lines.push(buildSimpleTable(["Outcome", "Count"], report.byOutcomeRows));
 
+  lines.push("<h3>By Penalty Type</h3>");
+  lines.push(buildSimpleTable(["Penalty Type", "Count"], report.byPenaltyRows));
+
+  lines.push("<h3>Shot List</h3>");
+  lines.push(buildSimpleTable(["#", "Team", "Player", "Path", "Result", "Penalty", "Outcome"], report.shotRows));
+
   els.reportSummary.innerHTML = lines.join("\n");
 }
 
@@ -791,6 +822,7 @@ function buildReportData() {
   const byTo = new Map();
   const byResult = new Map();
   const byOutcome = new Map();
+  const byPenalty = new Map();
 
   let goalsOur = 0;
   let goalsOpp = 0;
@@ -798,6 +830,7 @@ function buildReportData() {
   for (const shot of shots) {
     const player = shot.player || "Unknown";
     const result = shot.result || "-";
+    const penaltyType = shot.penaltyType || "-";
     const outcome = shot.outcome || "-";
 
     if (result === "Goal") {
@@ -816,6 +849,7 @@ function buildReportData() {
     incrementCount(byTo, String(shot.to ?? "-"));
     incrementCount(byResult, result);
     incrementCount(byOutcome, outcome);
+    if (result === "Penalty") incrementCount(byPenalty, penaltyType);
   }
 
   const byPlayerRows = Array.from(byPlayer.entries())
@@ -831,6 +865,16 @@ function buildReportData() {
     byToRows: mapToSortedRows(byTo),
     byResultRows: mapToSortedRows(byResult),
     byOutcomeRows: mapToSortedRows(byOutcome),
+    byPenaltyRows: mapToSortedRows(byPenalty),
+    shotRows: shots.map((shot) => [
+      shot.index,
+      teamLabel(shot.team),
+      shot.player || "-",
+      shot.path || "-",
+      shot.result || "-",
+      shot.penaltyType || "-",
+      shot.outcome || "-",
+    ]),
   };
 }
 
@@ -918,6 +962,24 @@ function generatePdfReport() {
     styles: { fontSize: 9 },
   });
 
+  doc.autoTable({
+    startY: doc.lastAutoTable.finalY + 14,
+    head: [["Penalty Type", "Count"]],
+    body: report.byPenaltyRows,
+    theme: "grid",
+    headStyles: { fillColor: [24, 74, 69] },
+    styles: { fontSize: 9 },
+  });
+
+  doc.autoTable({
+    startY: doc.lastAutoTable.finalY + 14,
+    head: [["#", "Team", "Player", "Path", "Result", "Penalty", "Outcome"]],
+    body: report.shotRows,
+    theme: "grid",
+    headStyles: { fillColor: [24, 74, 69] },
+    styles: { fontSize: 8 },
+  });
+
   const fileName = buildFileName("pdf");
   doc.save(fileName);
 }
@@ -938,7 +1000,7 @@ function exportCsv() {
   }
 
   const rows = [
-    ["index", "team", "player", "from", "to", "path", "result", "outcome", ...EXTRA_FIELDS.map((f) => f.key), "createdAt"],
+    ["index", "team", "player", "from", "to", "path", "result", "penaltyType", "outcome", ...EXTRA_FIELDS.map((f) => f.key), "createdAt"],
     ...state.shots.map((shot) => [
       shot.index,
       shot.team,
@@ -947,6 +1009,7 @@ function exportCsv() {
       shot.to ?? "",
       shot.path,
       shot.result,
+      shot.penaltyType || "",
       shot.outcome || "",
       ...EXTRA_FIELDS.map((f) => (shot.extras && shot.extras[f.key]) || ""),
       shot.createdAt,
@@ -965,7 +1028,7 @@ function exportJson() {
     teams: state.teams,
     shots: state.shots,
     schema: {
-      required: ["team", "player", "from", "to", "result", "outcome"],
+      required: ["team", "player", "from", "to", "result", "penaltyType", "outcome"],
       optional: EXTRA_FIELDS.map((f) => f.key),
     },
   };
@@ -1107,6 +1170,7 @@ function normalizeShots(shots) {
     to: typeof shot.to === "number" ? shot.to : (String(shot.to || "") === "Out" ? "Out" : Number(shot.to) || null),
     path: shot.path || `${shot.from ?? "-"}->${shot.to ?? "-"}`,
     result: RESULT_OPTIONS.includes(shot.result) ? shot.result : "Blocked",
+    penaltyType: shot.penaltyType || "",
     outcome: OUTCOME_OPTIONS.includes(shot.outcome) ? shot.outcome : "",
     extras: normalizeExtras(shot.extras),
     createdAt: shot.createdAt || new Date().toISOString(),
@@ -1127,8 +1191,20 @@ function normalizeExtras(extras) {
 function setupPWA() {
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
-      navigator.serviceWorker.register("sw.js").catch(() => {
-      });
+      navigator.serviceWorker
+        .register("sw.js", { updateViaCache: "none" })
+        .then((registration) => {
+          registration.update().catch(() => {
+          });
+
+          navigator.serviceWorker.addEventListener("controllerchange", () => {
+            if (window.__shotTrackerReloaded) return;
+            window.__shotTrackerReloaded = true;
+            window.location.reload();
+          });
+        })
+        .catch(() => {
+        });
     });
   }
 }
