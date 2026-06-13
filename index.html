@@ -19,7 +19,7 @@
     <div>
       <p class="eyebrow">PWA • Offline-First</p>
       <h1>Live Shot Tracker</h1>
-      <p class="sub">Track every shot live with one-tap path buttons and export at the final whistle.</p>
+      <p class="sub">Stats-only tracking with customizable players and end-of-game reporting.</p>
       <p id="iosInstallHint" class="hint hidden">On iPad: tap Share, then Add to Home Screen.</p>
     </div>
     <button id="installBtn" class="outline hidden" type="button">Install App</button>
@@ -28,7 +28,7 @@
   <main class="layout">
     <section id="setupScreen" class="card start-screen">
       <h2>Start Game</h2>
-      <p class="sub">Enter game details once, then switch to a clean live-tracking screen.</p>
+      <p class="sub">Set game info and player labels before live tracking.</p>
       <form id="startForm" class="grid two">
         <label>
           Sport
@@ -54,6 +54,21 @@
           Match Label (optional)
           <input id="matchLabel" type="text" placeholder="Round 4" />
         </label>
+
+        <div class="full-width roster-editor">
+          <h3>Player Labels</h3>
+          <div class="roster-grid">
+            <section>
+              <h4>Our Team (6)</h4>
+              <div id="ourRosterInputs" class="roster-inputs"></div>
+            </section>
+            <section>
+              <h4>Opponent (6)</h4>
+              <div id="oppRosterInputs" class="roster-inputs"></div>
+            </section>
+          </div>
+        </div>
+
         <div class="full-width actions">
           <button id="startGame" type="submit">Start Live Tracking</button>
         </div>
@@ -61,31 +76,13 @@
     </section>
 
     <section id="liveScreen" class="hidden">
-      <section class="card compact-header">
-        <div>
-          <h2 id="matchTitle">Match</h2>
-          <p class="sub" id="matchMeta">Ready</p>
-        </div>
-        <div class="timer-wrap compact">
-          <div>
-            <p class="timer-label">Game Clock</p>
-            <p id="timer" class="timer">00:00</p>
-          </div>
-          <div class="timer-actions">
-            <button id="startTimer" type="button">Start</button>
-            <button id="pauseTimer" type="button" class="outline">Pause</button>
-            <button id="resetTimer" type="button" class="danger">Reset</button>
-          </div>
-        </div>
-      </section>
-
       <section class="card quick-controls">
-        <h2>Quick Settings</h2>
         <div class="control-strip">
           <button id="switchTeam" type="button" class="outline">Tracking: Our Team</button>
           <button id="swapBack" type="button" class="outline">Swap Back</button>
           <button id="toggleSubs" type="button" class="outline">Substitution</button>
           <button id="undoShot" type="button" class="outline">Undo Last</button>
+          <button id="newGame" type="button" class="danger">New Game</button>
         </div>
 
         <div id="subsPanel" class="subs-panel hidden" aria-label="Substitution controls">
@@ -108,11 +105,23 @@
         </div>
       </section>
 
-      <section class="card">
+      <section class="card workspace-nav">
+        <p class="path-label">Workspace</p>
+        <div class="view-nav" role="tablist" aria-label="Screen navigation">
+          <button id="viewCapture" class="outline active" data-view="capture" type="button">Capture</button>
+          <button id="viewStats" class="outline" data-view="stats" type="button">Stats</button>
+          <button id="viewLog" class="outline" data-view="log" type="button">Log</button>
+          <button id="viewReport" class="outline" data-view="report" type="button">Report</button>
+        </div>
+      </section>
+
+      <section id="panelCapture" class="card view-panel">
         <div class="table-head">
-          <h2>Shot Input</h2>
+          <h2 id="matchTitle">Match</h2>
           <p id="shotSideLabel">Tracking side: Our Team</p>
         </div>
+        <p class="sub" id="matchMeta">Ready</p>
+
         <div class="path-input" aria-label="Shot path input controls">
           <div class="path-group">
             <p class="path-label">Shooter (On Court)</p>
@@ -144,18 +153,24 @@
               <div id="outcomeRow" class="path-row choice-row" role="group" aria-label="Outcome selection"></div>
             </div>
           </div>
+
           <div class="path-actions">
+            <button id="toggleExtraFields" type="button" class="outline">More Shot Inputs</button>
             <p id="pathPreview" class="path-preview">Pending: choose shooter, from, hit, result, outcome</p>
+          </div>
+
+          <div id="extraFieldsPanel" class="extra-fields hidden">
+            <div id="extraFieldsContainer" class="grid two"></div>
           </div>
         </div>
       </section>
 
-      <section class="card">
+      <section id="panelStats" class="card view-panel hidden">
         <h2>Live Totals</h2>
         <div class="stats" id="stats"></div>
       </section>
 
-      <section class="card">
+      <section id="panelLog" class="card view-panel hidden">
         <div class="table-head">
           <h2>Shot Log</h2>
           <p id="shotCount">0 shots</p>
@@ -165,12 +180,12 @@
             <thead>
               <tr>
                 <th>#</th>
-                <th>Time</th>
                 <th>Team</th>
                 <th>Player</th>
                 <th>Path</th>
                 <th>Result</th>
                 <th>Outcome</th>
+                <th>Details</th>
               </tr>
             </thead>
             <tbody id="shotTableBody"></tbody>
@@ -178,12 +193,20 @@
         </div>
       </section>
 
-      <section class="card app-footer">
-        <div class="export-actions">
-          <button id="exportCsv" type="button">Export CSV</button>
-          <button id="exportJson" type="button" class="outline">Export JSON</button>
-          <button id="newGame" type="button" class="danger">New Game</button>
+      <section id="panelReport" class="card view-panel hidden">
+        <div class="table-head">
+          <h2>Report</h2>
+          <p>Summary and export</p>
         </div>
+        <div id="reportSummary" class="report-summary"></div>
+        <div class="export-actions">
+          <button id="generatePdf" type="button">Download PDF Report</button>
+          <button id="exportCsv" type="button" class="outline">Export CSV</button>
+          <button id="exportJson" type="button" class="outline">Export JSON</button>
+        </div>
+      </section>
+
+      <section class="card app-footer">
         <p class="hint">Everything is saved locally on this device. Works offline once loaded.</p>
       </section>
     </section>
@@ -197,6 +220,8 @@
     </article>
   </template>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js" defer></script>
   <script src="app.js" defer></script>
 </body>
 </html>

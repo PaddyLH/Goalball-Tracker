@@ -48,21 +48,35 @@ Data still stays local on each device unless exported.
 
 ## What it does
 
-- Start-page flow: capture game details once, then enter clean live mode
-- Record shots with a 2x7 selector: choose From (1-7) and To (1-7), then add shot
-- Keep quick controls for team, player, and result to apply to each tap
-- Keep a running game clock
+- Start-page flow: capture game details and player labels once, then enter live mode
+- Player labels for both teams (6 each), used in all displays and exports
+- Multi-screen live workspace with tabs: Capture, Stats, Log, Report
+- Record shots with shooter + from/hit/result/outcome rows and auto-submit
+- Expandable extra shot inputs (phase, defense, note), easy to extend in code
 - Auto-save everything locally in your browser (`localStorage`)
 - Work offline after first load via service worker cache
-- Export data at end of game to CSV or JSON
+- Export data at end of game to CSV, JSON, and PDF report
 
 ## Live workflow
 
 1. Open app and fill in game details on **Start Game** page.
 2. Press **Start Live Tracking**.
-3. In live screen, set Team/Result/Player once.
-4. Select From (1-7) and To (1-7), then tap Add Shot.
-5. Export CSV/JSON at the end.
+3. Use **Capture** tab to enter shots (auto-submits when required rows are complete).
+4. Open **More Shot Inputs** only when needed.
+5. Use **Stats** and **Log** tabs when you want to review.
+6. Use **Report** tab for breakdowns and PDF export.
+
+## Report output
+
+The PDF report includes:
+
+- Match header information
+- Totals and score summary
+- Player breakdown (shots, goals, blocked, out)
+- From-zone distribution
+- Hit-zone distribution
+- Result distribution
+- Outcome distribution
 
 ## Quick start (no hosting platform required)
 

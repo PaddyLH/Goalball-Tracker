@@ -9,7 +9,7 @@
   --danger: #9b2d30;
   --line: #cfbfaa;
   --radius: 14px;
-  --shadow: 0 10px 30px rgba(24, 74, 69, 0.08);
+  --shadow: 0 12px 30px rgba(24, 74, 69, 0.09);
 }
 
 * {
@@ -23,7 +23,7 @@ body {
   color: var(--text);
   background:
     radial-gradient(circle at 0% 0%, rgba(44, 110, 99, 0.17), transparent 35%),
-    radial-gradient(circle at 100% 100%, rgba(155, 45, 48, 0.16), transparent 35%),
+    radial-gradient(circle at 100% 100%, rgba(155, 45, 48, 0.12), transparent 35%),
     var(--bg);
   padding: 1rem;
 }
@@ -31,6 +31,7 @@ body {
 h1,
 h2,
 h3,
+h4,
 p {
   margin: 0;
 }
@@ -40,7 +41,7 @@ p {
 }
 
 .app-header {
-  max-width: 1100px;
+  max-width: 1180px;
   margin: 0 auto 1rem;
   display: flex;
   justify-content: space-between;
@@ -58,7 +59,7 @@ p {
 
 .sub {
   color: var(--muted);
-  margin-top: 0.5rem;
+  margin-top: 0.4rem;
 }
 
 #iosInstallHint {
@@ -66,7 +67,7 @@ p {
 }
 
 .layout {
-  max-width: 1100px;
+  max-width: 1180px;
   margin: 0 auto;
   display: grid;
   gap: 1rem;
@@ -81,7 +82,7 @@ p {
 }
 
 .start-screen {
-  max-width: 950px;
+  max-width: 1000px;
   margin: 0 auto;
 }
 
@@ -101,22 +102,24 @@ p {
 
 label {
   display: grid;
-  gap: 0.3rem;
+  gap: 0.35rem;
   font-weight: 600;
   color: var(--muted);
 }
 
 input,
 select,
-button {
+button,
+textarea {
   border: 1px solid var(--line);
   border-radius: 10px;
-  padding: 0.62rem 0.7rem;
+  padding: 0.62rem 0.72rem;
   font: inherit;
 }
 
 input,
-select {
+select,
+textarea {
   background: #fff;
 }
 
@@ -142,53 +145,17 @@ button.outline {
   border-color: var(--brand);
 }
 
+button.outline.active {
+  background: var(--brand);
+  color: #fff;
+}
+
 button.danger {
   background: var(--danger);
 }
 
 button.hidden {
   display: none;
-}
-
-.compact-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 1rem;
-  flex-wrap: wrap;
-}
-
-.timer-wrap {
-  margin-top: 1rem;
-  border: 1px dashed var(--line);
-  border-radius: 12px;
-  background: var(--surface-2);
-  padding: 0.8rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 1rem;
-}
-
-.timer-wrap.compact {
-  margin-top: 0;
-}
-
-.timer-label {
-  color: var(--muted);
-  font-size: 0.85rem;
-}
-
-.timer {
-  font-size: 1.7rem;
-  font-weight: 800;
-  letter-spacing: 0.04em;
-}
-
-.timer-actions {
-  display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
 }
 
 .actions {
@@ -201,12 +168,37 @@ button.hidden {
   grid-column: 1 / -1;
 }
 
-.controls-end {
-  align-items: end;
+.roster-editor {
+  margin-top: 0.2rem;
+  border: 1px dashed var(--line);
+  border-radius: 12px;
+  padding: 0.8rem;
+  background: var(--surface-2);
 }
 
-.quick-controls h2 {
-  margin-bottom: 0.65rem;
+.roster-editor h3 {
+  margin-bottom: 0.6rem;
+}
+
+.roster-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: 1fr;
+}
+
+.roster-grid h4 {
+  color: var(--muted);
+  margin-bottom: 0.35rem;
+}
+
+.roster-inputs {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.quick-controls {
+  display: grid;
+  gap: 0.7rem;
 }
 
 .control-strip {
@@ -216,7 +208,6 @@ button.hidden {
 }
 
 .subs-panel {
-  margin-top: 0.75rem;
   display: grid;
   gap: 0.7rem;
   grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
@@ -224,7 +215,28 @@ button.hidden {
   border: 1px dashed var(--line);
   border-radius: 12px;
   background: var(--surface-2);
-  padding: 0.7rem;
+  padding: 0.75rem;
+}
+
+.workspace-nav {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.path-label {
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.view-nav {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.view-panel {
+  display: grid;
+  gap: 0.8rem;
 }
 
 .path-input {
@@ -235,11 +247,6 @@ button.hidden {
 .path-group {
   display: grid;
   gap: 0.45rem;
-}
-
-.path-label {
-  color: var(--muted);
-  font-weight: 700;
 }
 
 .path-row-wrap {
@@ -259,7 +266,7 @@ button.hidden {
 }
 
 #shooterRow.choice-row {
-  grid-template-columns: repeat(3, minmax(100px, 1fr));
+  grid-template-columns: repeat(3, minmax(110px, 1fr));
 }
 
 #resultRow.choice-row {
@@ -270,34 +277,10 @@ button.hidden {
   grid-template-columns: repeat(2, minmax(110px, 1fr));
 }
 
-#fromRow.path-row {
-  grid-template-columns: repeat(8, minmax(40px, 1fr));
-  min-width: 360px;
-}
-
+#fromRow.path-row,
 #toRow.path-row {
   grid-template-columns: repeat(8, minmax(40px, 1fr));
   min-width: 360px;
-}
-
-.path-select-btn {
-  font-weight: 700;
-  font-size: 0.95rem;
-  padding: 0.62rem 0.2rem;
-  border-radius: 8px;
-  background: #f6ece0;
-  color: var(--brand);
-  border: 1px solid #cdbca7;
-}
-
-.path-select-btn:hover {
-  background: #e5d8c6;
-}
-
-.path-select-btn.selected {
-  background: var(--brand);
-  color: #fff;
-  border-color: var(--brand);
 }
 
 .choice-btn {
@@ -328,17 +311,27 @@ button.hidden {
   cursor: default;
 }
 
-#shotSideLabel {
-  font-weight: 700;
-}
-
 .path-actions {
-  display: block;
+  display: flex;
+  gap: 0.55rem;
+  flex-wrap: wrap;
+  align-items: center;
 }
 
 .path-preview {
   font-weight: 700;
   color: var(--muted);
+}
+
+.extra-fields {
+  border: 1px dashed var(--line);
+  border-radius: 12px;
+  background: var(--surface-2);
+  padding: 0.75rem;
+}
+
+#shotSideLabel {
+  font-weight: 700;
 }
 
 .stats {
@@ -351,7 +344,7 @@ button.hidden {
   border: 1px solid var(--line);
   border-radius: 12px;
   padding: 0.7rem;
-  background: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.82);
 }
 
 .stat-card .big {
@@ -363,6 +356,11 @@ button.hidden {
 .stat-card .small {
   margin-top: 0.1rem;
   color: var(--muted);
+}
+
+.report-summary {
+  display: grid;
+  gap: 0.7rem;
 }
 
 .table-head {
@@ -377,13 +375,13 @@ button.hidden {
   overflow: auto;
   border: 1px solid var(--line);
   border-radius: 10px;
+  background: #fff;
 }
 
 table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 640px;
-  background: #fff;
+  min-width: 620px;
 }
 
 th,
@@ -400,18 +398,16 @@ thead th {
   top: 0;
 }
 
-.app-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 1rem;
-  flex-wrap: wrap;
-}
-
 .export-actions {
   display: flex;
   gap: 0.5rem;
   flex-wrap: wrap;
+}
+
+.app-footer {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
 }
 
 .hint {
@@ -419,7 +415,7 @@ thead th {
   font-size: 0.9rem;
 }
 
-@media (max-width: 620px) {
+@media (max-width: 720px) {
   .path-row {
     min-width: 280px;
     grid-template-columns: repeat(7, minmax(34px, 1fr));
@@ -446,19 +442,18 @@ thead th {
     grid-template-columns: repeat(3, minmax(86px, 1fr));
   }
 
-  .path-select-btn {
-    font-size: 0.88rem;
-    padding: 0.55rem 0.1rem;
-  }
-
   .choice-btn {
     font-size: 0.84rem;
-    padding: 0.55rem 0.25rem;
+    padding: 0.52rem 0.22rem;
   }
 }
 
-@media (min-width: 850px) {
+@media (min-width: 900px) {
   .grid.two {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .roster-grid {
     grid-template-columns: repeat(2, 1fr);
   }
 }
