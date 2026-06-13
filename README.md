@@ -51,7 +51,8 @@ Data still stays local on each device unless exported.
 - Start-page flow: capture game details and player labels once, then enter live mode
 - Player labels for both teams (6 each), used in all displays and exports
 - Multi-screen live workspace with tabs: Capture, Stats, Log, Report
-- Record shots with shooter + from/hit/result/outcome rows and auto-submit
+- Record shots with shooter + from/hit/result rows and auto-submit
+- Result row is one line: Blocked, Out, Goal, Penalty. Penalty opens the penalty types.
 - Expandable extra shot inputs (phase, defense, note), easy to extend in code
 - Auto-save everything locally in your browser (`localStorage`)
 - Work offline after first load via service worker cache
@@ -62,9 +63,10 @@ Data still stays local on each device unless exported.
 1. Open app and fill in game details on **Start Game** page.
 2. Press **Start Live Tracking**.
 3. Use **Capture** tab to enter shots (auto-submits when required rows are complete).
-4. Open **More Shot Inputs** only when needed.
-5. Use **Stats** and **Log** tabs when you want to review.
-6. Use **Report** tab for breakdowns and PDF export.
+4. Select **Penalty** only when needed, then pick the penalty type.
+5. Open **More Shot Inputs** only when needed.
+6. Use **Stats** and **Log** tabs when you want to review.
+7. Use **Report** tab for breakdowns and PDF export.
 
 ## Report output
 
@@ -76,7 +78,7 @@ The PDF report includes:
 - From-zone distribution
 - Hit-zone distribution
 - Result distribution
-- Outcome distribution
+- Penalty type distribution
 
 ## Quick start (no hosting platform required)
 
