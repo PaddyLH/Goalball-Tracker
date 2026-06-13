@@ -79,6 +79,7 @@
       <section class="card quick-controls">
         <div class="control-strip">
           <button id="toggleSubs" type="button" class="outline">Substitution</button>
+          <button id="markHalfTime" type="button" class="outline">Half Time</button>
           <button id="switchTeam" type="button" class="outline">Tracking: Our Team</button>
           <button id="undoShot" type="button" class="outline">Undo Last</button>
         </div>
@@ -134,6 +135,37 @@
               <div id="penaltyRow" class="path-row choice-row" role="group" aria-label="Penalty type selection"></div>
             </div>
           </div>
+        </div>
+
+        <div class="export-actions">
+          <button id="resetInput" type="button" class="outline">Reset Input</button>
+          <button id="generatePdf" type="button">Export PDF</button>
+          <button id="exportCsv" type="button" class="outline">Export CSV</button>
+          <button id="exportJson" type="button" class="outline">Export JSON</button>
+          <button id="newGame" type="button" class="danger">New Game</button>
+        </div>
+      </section>
+
+      <section class="card view-panel">
+        <div class="table-head">
+          <h2>Shot History</h2>
+          <p id="shotCount">0 entries</p>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Team</th>
+                <th>Player</th>
+                <th>Path</th>
+                <th>Result</th>
+                <th>Penalty</th>
+                <th>Details</th>
+              </tr>
+            </thead>
+            <tbody id="shotTableBody"></tbody>
+          </table>
         </div>
       </section>
     </section>

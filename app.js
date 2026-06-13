@@ -77,6 +77,7 @@ const els = {
 
   switchTeam: document.getElementById("switchTeam"),
   toggleSubs: document.getElementById("toggleSubs"),
+  markHalfTime: document.getElementById("markHalfTime"),
   subsPanel: document.getElementById("subsPanel"),
   subTeam: document.getElementById("subTeam"),
   subOff: document.getElementById("subOff"),
@@ -95,6 +96,13 @@ const els = {
   extraFieldsContainer: document.getElementById("extraFieldsContainer"),
 
   undoShot: document.getElementById("undoShot"),
+  shotTableBody: document.getElementById("shotTableBody"),
+  shotCount: document.getElementById("shotCount"),
+  resetInput: document.getElementById("resetInput"),
+  generatePdf: document.getElementById("generatePdf"),
+  exportCsv: document.getElementById("exportCsv"),
+  exportJson: document.getElementById("exportJson"),
+  newGame: document.getElementById("newGame"),
 
   installBtn: document.getElementById("installBtn"),
   iosInstallHint: document.getElementById("iosInstallHint"),
@@ -115,11 +123,17 @@ function bindEvents() {
 
   els.switchTeam.addEventListener("click", onSwitchTeam);
   els.toggleSubs.addEventListener("click", onToggleSubs);
+  els.markHalfTime.addEventListener("click", onMarkHalfTime);
   els.subTeam.addEventListener("change", renderSubOptions);
   els.subOff.addEventListener("change", renderSubOptions);
   els.applySub.addEventListener("click", onApplySubstitution);
 
   els.undoShot.addEventListener("click", onUndoLastShot);
+  els.resetInput.addEventListener("click", onResetInput);
+  els.generatePdf.addEventListener("click", generatePdfReport);
+  els.exportCsv.addEventListener("click", exportCsv);
+  els.exportJson.addEventListener("click", exportJson);
+  els.newGame.addEventListener("click", onNewGame);
   els.installBtn.addEventListener("click", onInstallClick);
 
   window.addEventListener("beforeinstallprompt", (event) => {
@@ -319,7 +333,6 @@ function onControlUpdate() {
   markUpdated();
   saveState();
   renderShotRows();
-  renderInputSelection();
   maybeAutoSubmitShot();
 }
 
@@ -344,6 +357,7 @@ function submitShot() {
   const shot = {
     id: crypto.randomUUID(),
     index: state.shots.length + 1,
+    entryType: "shot",
     team,
     player: shooterName,
     from: state.controls.shotFrom,
@@ -358,6 +372,29 @@ function submitShot() {
   state.shots.push(shot);
   resetShotControls();
   swapTeam("auto");
+  markUpdated();
+  saveState();
+  renderAll();
+}
+
+function onMarkHalfTime() {
+  state.shots.push({
+    id: crypto.randomUUID(),
+    index: state.shots.length + 1,
+    entryType: "marker",
+    team: state.teams.current,
+    player: "",
+    from: null,
+    to: null,
+    path: "-",
+    result: "Half Time",
+    penaltyType: "",
+    extras: buildEmptyExtras(),
+    createdAt: new Date().toISOString(),
+  });
+
+  resetShotControls();
+  state.ui.showSubs = false;
   markUpdated();
   saveState();
   renderAll();
@@ -503,38 +540,6 @@ function onApplySubstitution() {
   renderAll();
 }
 
-function setView(viewName) {
-  state.ui.currentView = viewName;
-  markUpdated();
-  saveState();
-  renderWorkspacePanels();
-}
-
-function renderWorkspacePanels() {
-  const view = state.ui.currentView;
-  const panelMap = {
-    capture: els.panelCapture,
-    stats: els.panelStats,
-    log: els.panelLog,
-    report: els.panelReport,
-  };
-
-  const buttonMap = {
-    capture: els.viewCapture,
-    stats: els.viewStats,
-    log: els.viewLog,
-    report: els.viewReport,
-  };
-
-  Object.entries(panelMap).forEach(([key, panel]) => {
-    panel.classList.toggle("hidden", key !== view);
-  });
-
-  Object.entries(buttonMap).forEach(([key, btn]) => {
-    btn.classList.toggle("active", key === view);
-  });
-}
-
 function onUndoLastShot() {
   if (!state.shots.length) return;
   state.shots.pop();
@@ -544,6 +549,13 @@ function onUndoLastShot() {
   markUpdated();
   saveState();
   renderAll();
+}
+
+function onResetInput() {
+  resetShotControls();
+  markUpdated();
+  saveState();
+  renderShotRows();
 }
 
 function onNewGame() {
@@ -615,6 +627,16 @@ function normalizeSelection(value) {
 function renderShots() {
   if (!els.shotTableBody || !els.shotCount) return;
   const rows = state.shots.map((shot) => {
+    if (shot.entryType === "marker") {
+      return `
+        <tr>
+          <td>${shot.index}</td>
+          <td colspan="5"><strong>${escapeHtml(shot.result || "Marker")}</strong></td>
+          <td>${new Date(shot.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</td>
+        </tr>
+      `;
+    }
+
     const detailText = formatShotDetails(shot.extras || {});
     return `
       <tr>
@@ -630,7 +652,7 @@ function renderShots() {
   }).join("");
 
   els.shotTableBody.innerHTML = rows || `<tr><td colspan="7">No shots recorded yet.</td></tr>`;
-  els.shotCount.textContent = `${state.shots.length} shot${state.shots.length === 1 ? "" : "s"}`;
+  els.shotCount.textContent = `${state.shots.length} entr${state.shots.length === 1 ? "y" : "ies"}`;
 }
 
 function renderStats() {
@@ -708,7 +730,7 @@ function buildSimpleTable(headers, rows) {
 }
 
 function buildReportData() {
-  const shots = state.shots;
+  const shots = state.shots.filter((shot) => shot.entryType !== "marker");
   const byPlayer = new Map();
   const byFrom = new Map();
   const byTo = new Map();
@@ -878,9 +900,10 @@ function exportCsv() {
   }
 
   const rows = [
-    ["index", "team", "player", "from", "to", "path", "result", "penaltyType", ...EXTRA_FIELDS.map((f) => f.key), "createdAt"],
+    ["index", "entryType", "team", "player", "from", "to", "path", "result", "penaltyType", ...EXTRA_FIELDS.map((f) => f.key), "createdAt"],
     ...state.shots.map((shot) => [
       shot.index,
+      shot.entryType || "shot",
       shot.team,
       shot.player,
       shot.from ?? "",
@@ -905,7 +928,7 @@ function exportJson() {
     teams: state.teams,
     shots: state.shots,
     schema: {
-      required: ["team", "player", "from", "to", "result", "penaltyType"],
+      required: ["entryType", "team", "player", "from", "to", "result", "penaltyType"],
       optional: EXTRA_FIELDS.map((f) => f.key),
     },
   };
@@ -1041,12 +1064,13 @@ function normalizeShots(shots) {
   return shots.map((shot, i) => ({
     id: shot.id || crypto.randomUUID(),
     index: i + 1,
+    entryType: shot.entryType === "marker" ? "marker" : "shot",
     team: shot.team === "opponent" ? "opponent" : "our",
     player: shot.player || "Unknown",
     from: typeof shot.from === "number" ? shot.from : Number(shot.from) || null,
     to: typeof shot.to === "number" ? shot.to : (String(shot.to || "") === "Out" ? "Out" : Number(shot.to) || null),
     path: shot.path || `${shot.from ?? "-"}->${shot.to ?? "-"}`,
-    result: RESULT_OPTIONS.includes(shot.result) ? shot.result : "Blocked",
+    result: shot.entryType === "marker" ? (shot.result || "Marker") : (RESULT_OPTIONS.includes(shot.result) ? shot.result : "Blocked"),
     penaltyType: shot.penaltyType || "",
     extras: normalizeExtras(shot.extras),
     createdAt: shot.createdAt || new Date().toISOString(),

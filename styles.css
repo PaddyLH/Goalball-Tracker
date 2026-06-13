@@ -218,6 +218,10 @@ button.hidden {
   padding: 0.75rem;
 }
 
+.subs-panel.hidden {
+  display: none;
+}
+
 .workspace-nav {
   display: grid;
   gap: 0.5rem;
