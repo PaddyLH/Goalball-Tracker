@@ -235,6 +235,11 @@ button.hidden {
   min-width: 320px;
 }
 
+.choice-row {
+  min-width: 280px;
+  grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+}
+
 .path-select-btn {
   font-weight: 700;
   font-size: 0.95rem;
@@ -250,6 +255,26 @@ button.hidden {
 }
 
 .path-select-btn.selected {
+  background: var(--brand);
+  color: #fff;
+  border-color: var(--brand);
+}
+
+.choice-btn {
+  font-weight: 700;
+  font-size: 0.9rem;
+  padding: 0.62rem 0.4rem;
+  border-radius: 8px;
+  background: #f6ece0;
+  color: var(--brand);
+  border: 1px solid #cdbca7;
+}
+
+.choice-btn:hover {
+  background: #e5d8c6;
+}
+
+.choice-btn.selected {
   background: var(--brand);
   color: #fff;
   border-color: var(--brand);
@@ -351,9 +376,19 @@ thead th {
     grid-template-columns: repeat(7, minmax(34px, 1fr));
   }
 
+  .choice-row {
+    min-width: 260px;
+    grid-template-columns: repeat(3, minmax(74px, 1fr));
+  }
+
   .path-select-btn {
     font-size: 0.88rem;
     padding: 0.55rem 0.1rem;
+  }
+
+  .choice-btn {
+    font-size: 0.84rem;
+    padding: 0.55rem 0.25rem;
   }
 }
 

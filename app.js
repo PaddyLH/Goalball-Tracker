@@ -19,7 +19,7 @@ const initialState = {
   controls: {
     shotTeam: "our",
     result: "Goal",
-    player: "",
+    player: "Player 1",
     shotFrom: null,
     shotTo: null,
   },
@@ -53,8 +53,8 @@ const els = {
   pauseTimer: document.getElementById("pauseTimer"),
   resetTimer: document.getElementById("resetTimer"),
   shotTeam: document.getElementById("shotTeam"),
-  result: document.getElementById("result"),
-  player: document.getElementById("player"),
+  resultRow: document.getElementById("resultRow"),
+  playerRow: document.getElementById("playerRow"),
   fromRow: document.getElementById("fromRow"),
   toRow: document.getElementById("toRow"),
   pathPreview: document.getElementById("pathPreview"),
@@ -83,8 +83,6 @@ function bindEvents() {
   els.startForm.addEventListener("input", onStartFormInput);
 
   els.shotTeam.addEventListener("change", onControlChange);
-  els.result.addEventListener("change", onControlChange);
-  els.player.addEventListener("input", onControlChange);
   els.addShot.addEventListener("click", onAddShotClick);
 
   els.startTimer.addEventListener("click", startTimer);
@@ -115,6 +113,7 @@ function bindEvents() {
 function buildPathSelectors() {
   buildPathRow(els.fromRow, "from");
   buildPathRow(els.toRow, "to");
+  buildChoiceRows();
 }
 
 function buildPathRow(target, type) {
@@ -142,10 +141,41 @@ function onStartFormInput() {
 
 function onControlChange() {
   state.controls.shotTeam = els.shotTeam.value;
-  state.controls.result = els.result.value;
-  state.controls.player = els.player.value.trim();
   markUpdated();
   saveState();
+}
+
+function buildChoiceRows() {
+  const resultOptions = ["Goal", "Block", "Out"];
+  const playerOptions = ["Player 1", "Player 2", "Player 3", "Player 4", "Player 5", "Player 6"];
+
+  buildChoiceRow(els.resultRow, resultOptions, "result");
+  buildChoiceRow(els.playerRow, playerOptions, "player");
+}
+
+function buildChoiceRow(target, options, type) {
+  const fragment = document.createDocumentFragment();
+
+  for (const option of options) {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "choice-btn";
+    btn.dataset.type = type;
+    btn.dataset.value = option;
+    btn.textContent = option;
+    btn.setAttribute("aria-label", `${type === "result" ? "Result" : "Shooter"} ${option}`);
+    btn.addEventListener("click", () => onChoiceSelect(type, option));
+    fragment.appendChild(btn);
+  }
+
+  target.appendChild(fragment);
+}
+
+function onChoiceSelect(type, value) {
+  state.controls[type] = value;
+  markUpdated();
+  saveState();
+  renderChoiceSelectors();
 }
 
 function onPathSelect(type, value) {
@@ -303,6 +333,7 @@ function renderAll() {
   renderMatchHeader();
   renderTimer();
   renderPathSelectors();
+  renderChoiceSelectors();
   renderShots();
   renderStats();
 
@@ -323,11 +354,25 @@ function renderPathSelectors() {
   els.pathPreview.textContent = hasBoth ? `Selected: ${from}->${to}` : "Selected: -";
 }
 
+function renderChoiceSelectors() {
+  renderChoiceRowButtons(els.resultRow, state.controls.result);
+  renderChoiceRowButtons(els.playerRow, state.controls.player);
+}
+
 function renderPathRowButtons(row, selectedValue) {
   const buttons = row.querySelectorAll("button.path-select-btn");
   buttons.forEach((btn) => {
     const value = Number(btn.dataset.value);
     const selected = value === selectedValue;
+    btn.classList.toggle("selected", selected);
+    btn.setAttribute("aria-pressed", selected ? "true" : "false");
+  });
+}
+
+function renderChoiceRowButtons(row, selectedValue) {
+  const buttons = row.querySelectorAll("button.choice-btn");
+  buttons.forEach((btn) => {
+    const selected = btn.dataset.value === selectedValue;
     btn.classList.toggle("selected", selected);
     btn.setAttribute("aria-pressed", selected ? "true" : "false");
   });
@@ -507,8 +552,8 @@ function hydrateForms() {
   els.matchLabel.value = state.game.matchLabel || "";
 
   els.shotTeam.value = state.controls.shotTeam || "our";
-  els.result.value = state.controls.result || "Goal";
-  els.player.value = state.controls.player || "";
+  state.controls.result = state.controls.result || "Goal";
+  state.controls.player = state.controls.player || "Player 1";
   els.pathPreview.textContent = "Selected: -";
 }
 
@@ -556,8 +601,8 @@ function normalizeShots(shots) {
     to: shot.to,
     path: shot.path || toLegacyPath(shot),
     team: shot.team || "our",
-    player: shot.player || "",
-    result: shot.result || "Saved",
+    player: shot.player || "Player 1",
+    result: shot.result || "Block",
     elapsedMs: Number(shot.elapsedMs || 0),
     createdAt: shot.createdAt || new Date().toISOString(),
   }));

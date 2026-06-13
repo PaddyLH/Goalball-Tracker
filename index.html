@@ -89,21 +89,18 @@
               <option value="opponent">Opponent</option>
             </select>
           </label>
-          <label>
-            Result
-            <select id="result">
-              <option value="Goal">Goal</option>
-              <option value="Saved">Saved</option>
-              <option value="Blocked">Blocked</option>
-              <option value="Missed">Missed</option>
-              <option value="Post/Bar">Post/Bar</option>
-              <option value="Turnover">Turnover</option>
-            </select>
-          </label>
-          <label>
-            Player (optional)
-            <input id="player" type="text" placeholder="#7 or Name" />
-          </label>
+          <div>
+            <p class="path-label">Result</p>
+            <div class="path-row-wrap">
+              <div id="resultRow" class="path-row choice-row" role="group" aria-label="Result selection"></div>
+            </div>
+          </div>
+          <div>
+            <p class="path-label">Shooter</p>
+            <div class="path-row-wrap">
+              <div id="playerRow" class="path-row choice-row" role="group" aria-label="Player selection"></div>
+            </div>
+          </div>
           <div class="actions controls-end">
             <button id="undoShot" type="button" class="outline">Undo Last</button>
           </div>
