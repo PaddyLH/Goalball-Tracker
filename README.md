@@ -11,8 +11,9 @@ Use GitHub Pages. It gives you one browser link, and iPad users can install to H
 1. Create a GitHub repository and upload this project.
 2. Make sure the default branch is named main.
 3. Push once. The included workflow at [.github/workflows/pages.yml](.github/workflows/pages.yml) deploys automatically.
-4. In repository settings, open Pages and set Source to GitHub Actions (if not already set).
-5. Your public link will be:
+4. Push once. The workflow auto-enables Pages for most repositories.
+5. If your org policy blocks auto-enable, set Pages source manually to GitHub Actions in repository settings.
+6. Your public link will be:
 	https://YOUR-USERNAME.github.io/YOUR-REPO/
 
 ### Configure deployment (optional)
