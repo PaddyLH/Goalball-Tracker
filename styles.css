@@ -274,11 +274,13 @@ button.hidden {
 }
 
 #resultRow.choice-row {
-  grid-template-columns: repeat(3, minmax(84px, 1fr));
+  grid-template-columns: repeat(4, minmax(96px, 1fr));
+  min-width: 420px;
 }
 
-#outcomeRow.choice-row {
-  grid-template-columns: repeat(2, minmax(110px, 1fr));
+#penaltyRow.choice-row {
+  grid-template-columns: repeat(4, minmax(96px, 1fr));
+  min-width: 420px;
 }
 
 #fromRow.path-row,
@@ -292,6 +294,7 @@ button.hidden {
   font-size: 0.9rem;
   padding: 0.62rem 0.4rem;
   border-radius: 8px;
+  white-space: nowrap;
   background: #f6ece0;
   color: var(--brand);
   border: 1px solid #cdbca7;
@@ -336,6 +339,7 @@ button.hidden {
 
 #shotSideLabel {
   font-weight: 700;
+  color: var(--brand);
 }
 
 .stats {
@@ -372,7 +376,7 @@ button.hidden {
   justify-content: space-between;
   align-items: center;
   gap: 0.6rem;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.1rem;
 }
 
 .table-wrap {
@@ -431,11 +435,6 @@ thead th {
     grid-template-columns: repeat(8, minmax(34px, 1fr));
   }
 
-  #outcomeRow.choice-row {
-    min-width: 220px;
-    grid-template-columns: repeat(2, minmax(100px, 1fr));
-  }
-
   .choice-row {
     min-width: 260px;
     grid-template-columns: repeat(3, minmax(74px, 1fr));
@@ -444,6 +443,12 @@ thead th {
   #shooterRow.choice-row {
     min-width: 260px;
     grid-template-columns: repeat(3, minmax(86px, 1fr));
+  }
+
+  #resultRow.choice-row,
+  #penaltyRow.choice-row {
+    min-width: 420px;
+    grid-template-columns: repeat(4, minmax(96px, 1fr));
   }
 
   .choice-btn {

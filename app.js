@@ -71,15 +71,11 @@ const els = {
   opponent: document.getElementById("opponent"),
   venue: document.getElementById("venue"),
   analyst: document.getElementById("analyst"),
-    penaltyType: state.controls.result === "Penalty" ? state.controls.penaltyType : "",
   matchLabel: document.getElementById("matchLabel"),
   ourRosterInputs: document.getElementById("ourRosterInputs"),
   oppRosterInputs: document.getElementById("oppRosterInputs"),
-  matchTitle: document.getElementById("matchTitle"),
-  matchMeta: document.getElementById("matchMeta"),
 
   switchTeam: document.getElementById("switchTeam"),
-  swapBack: document.getElementById("swapBack"),
   toggleSubs: document.getElementById("toggleSubs"),
   subsPanel: document.getElementById("subsPanel"),
   subTeam: document.getElementById("subTeam"),
@@ -87,14 +83,7 @@ const els = {
   subOn: document.getElementById("subOn"),
   applySub: document.getElementById("applySub"),
 
-  viewCapture: document.getElementById("viewCapture"),
-  viewStats: document.getElementById("viewStats"),
-  viewLog: document.getElementById("viewLog"),
-  viewReport: document.getElementById("viewReport"),
   panelCapture: document.getElementById("panelCapture"),
-  panelStats: document.getElementById("panelStats"),
-  panelLog: document.getElementById("panelLog"),
-  panelReport: document.getElementById("panelReport"),
 
   shooterRow: document.getElementById("shooterRow"),
   fromRow: document.getElementById("fromRow"),
@@ -103,24 +92,12 @@ const els = {
   penaltyPanel: document.getElementById("penaltyPanel"),
   penaltyRow: document.getElementById("penaltyRow"),
   shotSideLabel: document.getElementById("shotSideLabel"),
-  pathPreview: document.getElementById("pathPreview"),
-  toggleExtraFields: document.getElementById("toggleExtraFields"),
-  extraFieldsPanel: document.getElementById("extraFieldsPanel"),
   extraFieldsContainer: document.getElementById("extraFieldsContainer"),
 
   undoShot: document.getElementById("undoShot"),
-  shotTableBody: document.getElementById("shotTableBody"),
-  shotCount: document.getElementById("shotCount"),
-  stats: document.getElementById("stats"),
-  reportSummary: document.getElementById("reportSummary"),
-  generatePdf: document.getElementById("generatePdf"),
-  exportCsv: document.getElementById("exportCsv"),
-  exportJson: document.getElementById("exportJson"),
-  newGame: document.getElementById("newGame"),
 
   installBtn: document.getElementById("installBtn"),
   iosInstallHint: document.getElementById("iosInstallHint"),
-  statCardTemplate: document.getElementById("statCardTemplate"),
 };
 
 buildRosterInputs();
@@ -137,24 +114,12 @@ function bindEvents() {
   els.startForm.addEventListener("input", onStartFormInput);
 
   els.switchTeam.addEventListener("click", onSwitchTeam);
-  els.swapBack.addEventListener("click", onSwapBack);
   els.toggleSubs.addEventListener("click", onToggleSubs);
   els.subTeam.addEventListener("change", renderSubOptions);
   els.subOff.addEventListener("change", renderSubOptions);
   els.applySub.addEventListener("click", onApplySubstitution);
 
-  els.viewCapture.addEventListener("click", () => setView("capture"));
-  els.viewStats.addEventListener("click", () => setView("stats"));
-  els.viewLog.addEventListener("click", () => setView("log"));
-  els.viewReport.addEventListener("click", () => setView("report"));
-
-  els.toggleExtraFields.addEventListener("click", onToggleExtraFields);
-
   els.undoShot.addEventListener("click", onUndoLastShot);
-  els.generatePdf.addEventListener("click", generatePdfReport);
-  els.exportCsv.addEventListener("click", exportCsv);
-  els.exportJson.addEventListener("click", exportJson);
-  els.newGame.addEventListener("click", onNewGame);
   els.installBtn.addEventListener("click", onInstallClick);
 
   window.addEventListener("beforeinstallprompt", (event) => {
@@ -274,6 +239,7 @@ function refreshRowButtons(target, values, type, onSelect) {
 }
 
 function buildExtraFields() {
+  if (!els.extraFieldsContainer) return;
   els.extraFieldsContainer.innerHTML = "";
 
   for (const field of EXTRA_FIELDS) {
@@ -311,7 +277,6 @@ function onExtraFieldInput(event) {
   state.controls.extras[key] = event.target.value;
   markUpdated();
   saveState();
-  renderInputSelection();
   maybeAutoSubmitShot();
 }
 
@@ -411,13 +376,6 @@ function buildEmptyExtras() {
   const extras = {};
   for (const field of EXTRA_FIELDS) extras[field.key] = "";
   return extras;
-}
-
-function onToggleExtraFields() {
-  state.ui.showExtraFields = !state.ui.showExtraFields;
-  markUpdated();
-  saveState();
-  renderExtraFieldsPanel();
 }
 
 function onStartFormInput() {
@@ -604,13 +562,9 @@ function onNewGame() {
 
 function renderAll() {
   renderView();
-  renderMatchHeader();
   renderTeamControls();
   renderSubsPanel();
-  renderWorkspacePanels();
   renderShotRows();
-  renderExtraFieldsPanel();
-  renderInputSelection();
   renderShots();
   renderStats();
   renderReportSummary();
@@ -622,23 +576,10 @@ function renderView() {
   els.liveScreen.classList.toggle("hidden", !inLiveMode);
 }
 
-function renderMatchHeader() {
-  const team = state.game.teamName || "Our Team";
-  const opp = state.game.opponent || "Opponent";
-  els.matchTitle.textContent = `${team} vs ${opp}`;
-
-  const bits = [state.game.sport];
-  if (state.game.venue) bits.push(state.game.venue);
-  if (state.game.matchLabel) bits.push(state.game.matchLabel);
-  if (state.game.analyst) bits.push(`Analyst: ${state.game.analyst}`);
-  els.matchMeta.textContent = bits.join(" | ");
-}
-
 function renderTeamControls() {
   const currentLabel = teamLabel(state.teams.current);
   els.switchTeam.textContent = `Tracking: ${currentLabel}`;
-  els.shotSideLabel.textContent = `Tracking side: ${currentLabel}`;
-  els.swapBack.disabled = state.teams.history.length === 0;
+  els.shotSideLabel.textContent = currentLabel;
 }
 
 function renderShotRows() {
@@ -649,17 +590,6 @@ function renderShotRows() {
   highlightSelection(els.resultRow, state.controls.result, "value");
   highlightSelection(els.penaltyRow, state.controls.penaltyType, "value");
   els.penaltyPanel.classList.toggle("hidden", state.controls.result !== "Penalty");
-}
-
-function renderExtraFieldsPanel() {
-  els.extraFieldsPanel.classList.toggle("hidden", !state.ui.showExtraFields);
-  els.toggleExtraFields.textContent = state.ui.showExtraFields ? "Hide Extra Inputs" : "More Shot Inputs";
-
-  for (const field of EXTRA_FIELDS) {
-    const element = els.extraFieldsContainer.querySelector(`[data-key="${field.key}"]`);
-    if (!element) continue;
-    element.value = state.controls.extras[field.key] || "";
-  }
 }
 
 function highlightSelection(row, selected, by) {
@@ -682,26 +612,8 @@ function normalizeSelection(value) {
   return String(value).toLowerCase();
 }
 
-function renderInputSelection() {
-  const shooter = Number.isInteger(state.controls.shooterIndex)
-    ? getActivePlayerNames()[state.controls.shooterIndex]
-    : "-";
-  const from = Number.isInteger(state.controls.shotFrom) ? state.controls.shotFrom : "-";
-  const to = (Number.isInteger(state.controls.shotTo) || state.controls.shotTo === "Out") ? state.controls.shotTo : "-";
-  const result = state.controls.result || "-";
-  const penaltyType = state.controls.result === "Penalty" ? (state.controls.penaltyType || "-") : "-";
-
-  const extraSummary = EXTRA_FIELDS
-    .map((field) => state.controls.extras[field.key])
-    .filter(Boolean)
-    .join(" | ");
-
-  els.pathPreview.textContent = extraSummary
-    ? `Pending: ${shooter} | ${from}->${to} | ${result} | ${penaltyType} | ${extraSummary}`
-    : `Pending: ${shooter} | ${from}->${to} | ${result} | ${penaltyType}`;
-}
-
 function renderShots() {
+  if (!els.shotTableBody || !els.shotCount) return;
   const rows = state.shots.map((shot) => {
     const detailText = formatShotDetails(shot.extras || {});
     return `
@@ -722,6 +634,7 @@ function renderShots() {
 }
 
 function renderStats() {
+  if (!els.stats || !els.statCardTemplate) return;
   const all = state.shots;
   const ourShots = all.filter((s) => s.team === "our");
   const oppShots = all.filter((s) => s.team === "opponent");
@@ -757,6 +670,7 @@ function renderStats() {
 }
 
 function renderReportSummary() {
+  if (!els.reportSummary) return;
   const report = buildReportData();
 
   const lines = [];
@@ -1157,12 +1071,6 @@ function setupPWA() {
         .register("sw.js", { updateViaCache: "none" })
         .then((registration) => {
           registration.update().catch(() => {
-          });
-
-          navigator.serviceWorker.addEventListener("controllerchange", () => {
-            if (window.__shotTrackerReloaded) return;
-            window.__shotTrackerReloaded = true;
-            window.location.reload();
           });
         })
         .catch(() => {
