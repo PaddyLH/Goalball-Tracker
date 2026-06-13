@@ -1,7 +1,8 @@
 const STORAGE_KEY = "live-shot-tracker-v3";
-const APP_VERSION = "3.0.0";
+const APP_VERSION = "3.1.0";
 
 const RESULT_OPTIONS = ["Goal", "Blocked", "Out"];
+const OUTCOME_OPTIONS = ["Highball", "Longball"];
 const OUR_ROSTER_DEFAULT = ["Player 1", "Player 2", "Player 3", "Player 4", "Player 5", "Player 6"];
 const OPP_ROSTER_DEFAULT = ["Opp 1", "Opp 2", "Opp 3", "Opp 4", "Opp 5", "Opp 6"];
 
@@ -37,6 +38,7 @@ const initialState = {
     shotFrom: null,
     shotTo: null,
     result: null,
+    outcome: null,
   },
   shots: [],
   meta: {
@@ -78,6 +80,8 @@ const els = {
   fromRow: document.getElementById("fromRow"),
   toRow: document.getElementById("toRow"),
   resultRow: document.getElementById("resultRow"),
+  outcomeRow: document.getElementById("outcomeRow"),
+  shotSideLabel: document.getElementById("shotSideLabel"),
   pathPreview: document.getElementById("pathPreview"),
   undoShot: document.getElementById("undoShot"),
   shotTableBody: document.getElementById("shotTableBody"),
@@ -139,6 +143,7 @@ function buildInputRows() {
   buildFromRow();
   buildToRow();
   buildResultRow();
+  buildOutcomeRow();
 }
 
 function buildShooterRow() {
@@ -146,7 +151,7 @@ function buildShooterRow() {
 }
 
 function buildFromRow() {
-  refreshRowButtons(els.fromRow, ["1", "2", "3", "4", "5", "6", "7"], "from", onSelectFrom);
+  refreshRowButtons(els.fromRow, ["1", "2", "3", "4", "5", "6", "7", ""], "from", onSelectFrom);
 }
 
 function buildToRow() {
@@ -155,6 +160,10 @@ function buildToRow() {
 
 function buildResultRow() {
   refreshRowButtons(els.resultRow, RESULT_OPTIONS, "result", onSelectResult);
+}
+
+function buildOutcomeRow() {
+  refreshRowButtons(els.outcomeRow, OUTCOME_OPTIONS, "outcome", onSelectOutcome);
 }
 
 function refreshRowButtons(target, values, type, onSelect) {
@@ -169,7 +178,13 @@ function refreshRowButtons(target, values, type, onSelect) {
     btn.dataset.value = String(value);
     btn.dataset.index = String(index);
     btn.textContent = String(value);
-    btn.addEventListener("click", () => onSelect(value, index));
+    if (!String(value).trim()) {
+      btn.classList.add("blank-slot");
+      btn.disabled = true;
+      btn.setAttribute("aria-hidden", "true");
+    } else {
+      btn.addEventListener("click", () => onSelect(value, index));
+    }
     fragment.appendChild(btn);
   });
 
@@ -203,9 +218,16 @@ function onSelectResult(value) {
   onControlUpdate();
 }
 
+function onSelectOutcome(value) {
+  state.controls.outcome = value;
+  onControlUpdate();
+}
+
 function onControlUpdate() {
   markUpdated();
   saveState();
+  renderShotRows();
+  renderTeamControls();
   renderInputSelection();
   maybeAutoSubmitShot();
 }
@@ -214,7 +236,8 @@ function maybeAutoSubmitShot() {
   const ready = Number.isInteger(state.controls.shooterIndex)
     && Number.isInteger(state.controls.shotFrom)
     && (Number.isInteger(state.controls.shotTo) || state.controls.shotTo === "Out")
-    && Boolean(state.controls.result);
+    && Boolean(state.controls.result)
+    && Boolean(state.controls.outcome);
 
   if (!ready || !state.game.started) return;
 
@@ -237,6 +260,7 @@ function submitShot() {
     to: state.controls.shotTo,
     path: `${state.controls.shotFrom}->${state.controls.shotTo}`,
     result: state.controls.result,
+    outcome: state.controls.outcome,
     elapsedMs: getElapsedMs(),
     createdAt: new Date().toISOString(),
   };
@@ -254,6 +278,7 @@ function resetShotControls() {
   state.controls.shotFrom = null;
   state.controls.shotTo = null;
   state.controls.result = null;
+  state.controls.outcome = null;
 }
 
 function onStartFormInput() {
@@ -504,6 +529,7 @@ function renderTimer() {
 function renderTeamControls() {
   const currentLabel = teamLabel(state.teams.current);
   els.switchTeam.textContent = `Tracking: ${currentLabel}`;
+  els.shotSideLabel.textContent = `Tracking side: ${currentLabel}`;
   els.swapBack.disabled = state.teams.history.length === 0;
 }
 
@@ -513,6 +539,7 @@ function renderShotRows() {
   highlightSelection(els.fromRow, state.controls.shotFrom, "value");
   highlightSelection(els.toRow, state.controls.shotTo, "value");
   highlightSelection(els.resultRow, state.controls.result, "value");
+  highlightSelection(els.outcomeRow, state.controls.outcome, "value");
 }
 
 function highlightSelection(row, selected, by) {
@@ -542,8 +569,9 @@ function renderInputSelection() {
   const from = Number.isInteger(state.controls.shotFrom) ? state.controls.shotFrom : "-";
   const to = (Number.isInteger(state.controls.shotTo) || state.controls.shotTo === "Out") ? state.controls.shotTo : "-";
   const result = state.controls.result || "-";
+  const outcome = state.controls.outcome || "-";
 
-  els.pathPreview.textContent = `Pending: ${shooter} | ${from}->${to} | ${result}`;
+  els.pathPreview.textContent = `Pending: ${shooter} | ${from}->${to} | ${result} | ${outcome}`;
 }
 
 function renderShots() {
@@ -557,12 +585,13 @@ function renderShots() {
         <td>${escapeHtml(shot.player || "-")}</td>
         <td>${escapeHtml(shot.path || "-")}</td>
         <td>${escapeHtml(shot.result || "-")}</td>
+        <td>${escapeHtml(shot.outcome || "-")}</td>
       </tr>
       `;
     })
     .join("");
 
-  els.shotTableBody.innerHTML = rows || `<tr><td colspan="6">No shots recorded yet.</td></tr>`;
+  els.shotTableBody.innerHTML = rows || `<tr><td colspan="7">No shots recorded yet.</td></tr>`;
   els.shotCount.textContent = `${state.shots.length} shot${state.shots.length === 1 ? "" : "s"}`;
 }
 
@@ -614,7 +643,7 @@ function exportCsv() {
   }
 
   const rows = [
-    ["index", "gameTime", "team", "player", "from", "to", "path", "result", "createdAt"],
+    ["index", "gameTime", "team", "player", "from", "to", "path", "result", "outcome", "createdAt"],
     ...state.shots.map((shot) => [
       shot.index,
       formatDuration(shot.elapsedMs),
@@ -624,6 +653,7 @@ function exportCsv() {
       shot.to ?? "",
       shot.path,
       shot.result,
+      shot.outcome || "",
       shot.createdAt,
     ]),
   ];
@@ -767,6 +797,7 @@ function normalizeShots(shots) {
     to: typeof shot.to === "number" ? shot.to : (String(shot.to || "") === "Out" ? "Out" : Number(shot.to) || null),
     path: shot.path || `${shot.from ?? "-"}->${shot.to ?? "-"}`,
     result: RESULT_OPTIONS.includes(shot.result) ? shot.result : "Blocked",
+    outcome: OUTCOME_OPTIONS.includes(shot.outcome) ? shot.outcome : "",
     elapsedMs: Number(shot.elapsedMs || 0),
     createdAt: shot.createdAt || new Date().toISOString(),
   }));

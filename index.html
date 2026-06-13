@@ -111,7 +111,7 @@
       <section class="card">
         <div class="table-head">
           <h2>Shot Input</h2>
-          <p>Complete all rows to auto-submit</p>
+          <p id="shotSideLabel">Tracking side: Our Team</p>
         </div>
         <div class="path-input" aria-label="Shot path input controls">
           <div class="path-group">
@@ -138,8 +138,14 @@
               <div id="resultRow" class="path-row choice-row" role="group" aria-label="Result selection"></div>
             </div>
           </div>
+          <div class="path-group">
+            <p class="path-label">Outcome</p>
+            <div class="path-row-wrap">
+              <div id="outcomeRow" class="path-row choice-row" role="group" aria-label="Outcome selection"></div>
+            </div>
+          </div>
           <div class="path-actions">
-            <p id="pathPreview" class="path-preview">Pending: choose shooter, from, hit, result</p>
+            <p id="pathPreview" class="path-preview">Pending: choose shooter, from, hit, result, outcome</p>
           </div>
         </div>
       </section>
@@ -164,6 +170,7 @@
                 <th>Player</th>
                 <th>Path</th>
                 <th>Result</th>
+                <th>Outcome</th>
               </tr>
             </thead>
             <tbody id="shotTableBody"></tbody>

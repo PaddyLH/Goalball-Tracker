@@ -266,6 +266,15 @@ button.hidden {
   grid-template-columns: repeat(3, minmax(84px, 1fr));
 }
 
+#outcomeRow.choice-row {
+  grid-template-columns: repeat(2, minmax(110px, 1fr));
+}
+
+#fromRow.path-row {
+  grid-template-columns: repeat(8, minmax(40px, 1fr));
+  min-width: 360px;
+}
+
 #toRow.path-row {
   grid-template-columns: repeat(8, minmax(40px, 1fr));
   min-width: 360px;
@@ -309,6 +318,18 @@ button.hidden {
   background: var(--brand);
   color: #fff;
   border-color: var(--brand);
+}
+
+.choice-btn.blank-slot,
+.choice-btn.blank-slot:hover {
+  background: transparent;
+  border: 1px dashed #d8c9b5;
+  color: transparent;
+  cursor: default;
+}
+
+#shotSideLabel {
+  font-weight: 700;
 }
 
 .path-actions {
@@ -404,9 +425,15 @@ thead th {
     grid-template-columns: repeat(7, minmax(34px, 1fr));
   }
 
+  #fromRow.path-row,
   #toRow.path-row {
     min-width: 320px;
     grid-template-columns: repeat(8, minmax(34px, 1fr));
+  }
+
+  #outcomeRow.choice-row {
+    min-width: 220px;
+    grid-template-columns: repeat(2, minmax(100px, 1fr));
   }
 
   .choice-row {
