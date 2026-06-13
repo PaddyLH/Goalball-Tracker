@@ -11,9 +11,8 @@ Use GitHub Pages. It gives you one browser link, and iPad users can install to H
 1. Create a GitHub repository and upload this project.
 2. Make sure the default branch is named main.
 3. Push once. The included workflow at [.github/workflows/pages.yml](.github/workflows/pages.yml) deploys automatically.
-4. Push once. The workflow auto-enables Pages for most repositories.
-5. If your org policy blocks auto-enable, set Pages source manually to GitHub Actions in repository settings.
-6. Your public link will be:
+4. In repository settings, set Pages source to GitHub Actions (one-time).
+5. Your public link will be:
 	https://YOUR-USERNAME.github.io/YOUR-REPO/
 
 ### Configure deployment (optional)
@@ -50,7 +49,7 @@ Data still stays local on each device unless exported.
 ## What it does
 
 - Start-page flow: capture game details once, then enter clean live mode
-- Record shots via one-tap path buttons for all 1-7 to 1-7 combinations (49 buttons)
+- Record shots with a 2x7 selector: choose From (1-7) and To (1-7), then add shot
 - Keep quick controls for team, player, and result to apply to each tap
 - Keep a running game clock
 - Auto-save everything locally in your browser (`localStorage`)
@@ -62,7 +61,7 @@ Data still stays local on each device unless exported.
 1. Open app and fill in game details on **Start Game** page.
 2. Press **Start Live Tracking**.
 3. In live screen, set Team/Result/Player once.
-4. Tap the 1-7 to 1-7 shot path buttons as shots happen.
+4. Select From (1-7) and To (1-7), then tap Add Shot.
 5. Export CSV/JSON at the end.
 
 ## Quick start (no hosting platform required)

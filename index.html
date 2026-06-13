@@ -112,10 +112,27 @@
 
       <section class="card">
         <div class="table-head">
-          <h2>Shot Path Buttons (1-7 to 1-7)</h2>
-          <p>Tap once per shot</p>
+          <h2>Shot Input (2x7)</h2>
+          <p>Select From and To, then add shot</p>
         </div>
-        <div id="shotGrid" class="shot-grid" aria-label="Shot path button grid"></div>
+        <div class="path-input" aria-label="Shot path input controls">
+          <div class="path-group">
+            <p class="path-label">From (1-7)</p>
+            <div class="path-row-wrap">
+              <div id="fromRow" class="path-row" role="group" aria-label="From selection"></div>
+            </div>
+          </div>
+          <div class="path-group">
+            <p class="path-label">To (1-7)</p>
+            <div class="path-row-wrap">
+              <div id="toRow" class="path-row" role="group" aria-label="To selection"></div>
+            </div>
+          </div>
+          <div class="path-actions">
+            <p id="pathPreview" class="path-preview">Selected: -</p>
+            <button id="addShot" type="button">Add Shot</button>
+          </div>
+        </div>
       </section>
 
       <section class="card">

@@ -1,5 +1,5 @@
 const STORAGE_KEY = "live-shot-tracker-v2";
-const APP_VERSION = "2.0.0";
+const APP_VERSION = "2.1.0";
 
 const initialState = {
   game: {
@@ -20,6 +20,8 @@ const initialState = {
     shotTeam: "our",
     result: "Goal",
     player: "",
+    shotFrom: null,
+    shotTo: null,
   },
   shots: [],
   meta: {
@@ -53,8 +55,11 @@ const els = {
   shotTeam: document.getElementById("shotTeam"),
   result: document.getElementById("result"),
   player: document.getElementById("player"),
+  fromRow: document.getElementById("fromRow"),
+  toRow: document.getElementById("toRow"),
+  pathPreview: document.getElementById("pathPreview"),
+  addShot: document.getElementById("addShot"),
   undoShot: document.getElementById("undoShot"),
-  shotGrid: document.getElementById("shotGrid"),
   shotTableBody: document.getElementById("shotTableBody"),
   shotCount: document.getElementById("shotCount"),
   stats: document.getElementById("stats"),
@@ -66,7 +71,7 @@ const els = {
   statCardTemplate: document.getElementById("statCardTemplate"),
 };
 
-buildShotGrid();
+buildPathSelectors();
 hydrateForms();
 renderAll();
 bindEvents();
@@ -80,6 +85,7 @@ function bindEvents() {
   els.shotTeam.addEventListener("change", onControlChange);
   els.result.addEventListener("change", onControlChange);
   els.player.addEventListener("input", onControlChange);
+  els.addShot.addEventListener("click", onAddShotClick);
 
   els.startTimer.addEventListener("click", startTimer);
   els.pauseTimer.addEventListener("click", pauseTimer);
@@ -106,25 +112,27 @@ function bindEvents() {
   });
 }
 
-function buildShotGrid() {
+function buildPathSelectors() {
+  buildPathRow(els.fromRow, "from");
+  buildPathRow(els.toRow, "to");
+}
+
+function buildPathRow(target, type) {
   const fragment = document.createDocumentFragment();
 
-  // 7x7 matrix for path buttons from position 1-7 to 1-7.
-  for (let from = 1; from <= 7; from += 1) {
-    for (let to = 1; to <= 7; to += 1) {
-      const btn = document.createElement("button");
-      btn.type = "button";
-      btn.className = "path-btn";
-      btn.dataset.from = String(from);
-      btn.dataset.to = String(to);
-      btn.textContent = `${from}→${to}`;
-      btn.setAttribute("aria-label", `Shot from ${from} to ${to}`);
-      btn.addEventListener("click", () => addShotFromPath(from, to));
-      fragment.appendChild(btn);
-    }
+  for (let value = 1; value <= 7; value += 1) {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "path-select-btn";
+    btn.dataset.value = String(value);
+    btn.dataset.type = type;
+    btn.textContent = String(value);
+    btn.setAttribute("aria-label", `${type === "from" ? "From" : "To"} ${value}`);
+    btn.addEventListener("click", () => onPathSelect(type, value));
+    fragment.appendChild(btn);
   }
 
-  els.shotGrid.appendChild(fragment);
+  target.appendChild(fragment);
 }
 
 function onStartFormInput() {
@@ -138,6 +146,30 @@ function onControlChange() {
   state.controls.player = els.player.value.trim();
   markUpdated();
   saveState();
+}
+
+function onPathSelect(type, value) {
+  if (type === "from") {
+    state.controls.shotFrom = value;
+  } else {
+    state.controls.shotTo = value;
+  }
+
+  markUpdated();
+  saveState();
+  renderPathSelectors();
+}
+
+function onAddShotClick() {
+  const from = state.controls.shotFrom;
+  const to = state.controls.shotTo;
+
+  if (!Number.isInteger(from) || !Number.isInteger(to)) {
+    alert("Select both From and To before adding a shot.");
+    return;
+  }
+
+  addShotFromPath(from, to);
 }
 
 function onStartGame(event) {
@@ -270,6 +302,7 @@ function renderAll() {
   renderView();
   renderMatchHeader();
   renderTimer();
+  renderPathSelectors();
   renderShots();
   renderStats();
 
@@ -278,6 +311,26 @@ function renderAll() {
   } else {
     stopTicking();
   }
+}
+
+function renderPathSelectors() {
+  renderPathRowButtons(els.fromRow, state.controls.shotFrom);
+  renderPathRowButtons(els.toRow, state.controls.shotTo);
+
+  const from = state.controls.shotFrom;
+  const to = state.controls.shotTo;
+  const hasBoth = Number.isInteger(from) && Number.isInteger(to);
+  els.pathPreview.textContent = hasBoth ? `Selected: ${from}->${to}` : "Selected: -";
+}
+
+function renderPathRowButtons(row, selectedValue) {
+  const buttons = row.querySelectorAll("button.path-select-btn");
+  buttons.forEach((btn) => {
+    const value = Number(btn.dataset.value);
+    const selected = value === selectedValue;
+    btn.classList.toggle("selected", selected);
+    btn.setAttribute("aria-pressed", selected ? "true" : "false");
+  });
 }
 
 function renderView() {
@@ -456,6 +509,7 @@ function hydrateForms() {
   els.shotTeam.value = state.controls.shotTeam || "our";
   els.result.value = state.controls.result || "Goal";
   els.player.value = state.controls.player || "";
+  els.pathPreview.textContent = "Selected: -";
 }
 
 function saveState() {
