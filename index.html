@@ -79,7 +79,6 @@
       <section class="card quick-controls">
         <div class="control-strip">
           <button id="toggleSubs" type="button" class="outline">Substitution</button>
-          <button id="markHalfTime" type="button" class="outline">Half Time</button>
           <button id="switchTeam" type="button" class="outline">Tracking: Our Team</button>
           <button id="undoShot" type="button" class="outline">Undo Last</button>
         </div>
@@ -127,6 +126,11 @@
           </div>
           <div class="path-group">
             <div class="path-row-wrap">
+              <div id="shotTypeRow" class="path-row choice-row" role="group" aria-label="Shot type selection"></div>
+            </div>
+          </div>
+          <div class="path-group">
+            <div class="path-row-wrap">
               <div id="resultRow" class="path-row choice-row" role="group" aria-label="Result selection"></div>
             </div>
           </div>
@@ -135,6 +139,12 @@
               <div id="penaltyRow" class="path-row choice-row" role="group" aria-label="Penalty type selection"></div>
             </div>
           </div>
+        </div>
+
+        <div class="control-strip">
+          <button id="switchSideInline" type="button" class="outline">Switch Side</button>
+          <button id="markTimeout" type="button" class="outline">Timeout</button>
+          <button id="markHalfTime" type="button" class="outline">Half Time</button>
         </div>
 
         <div class="export-actions">
@@ -159,6 +169,7 @@
                 <th>Team</th>
                 <th>Player</th>
                 <th>Path</th>
+                <th>Shot Type</th>
                 <th>Result</th>
                 <th>Penalty</th>
                 <th>Details</th>

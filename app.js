@@ -3,6 +3,7 @@ const APP_VERSION = "4.0.0";
 
 const RESULT_OPTIONS = ["Blocked", "Out", "Goal", "Penalty"];
 const PENALTY_TYPES = ["10s", "Highball", "Longball", "Other"];
+const SHOT_TYPE_OPTIONS = ["Smooth", "Skippy", "Bounce"];
 const OUR_ROSTER_DEFAULT = ["Player 1", "Player 2", "Player 3", "Player 4", "Player 5", "Player 6"];
 const OPP_ROSTER_DEFAULT = ["Opp 1", "Opp 2", "Opp 3", "Opp 4", "Opp 5", "Opp 6"];
 
@@ -43,6 +44,7 @@ const initialState = {
     shooterIndex: null,
     shotFrom: null,
     shotTo: null,
+    shotType: null,
     result: null,
     penaltyType: null,
     extras: {
@@ -89,6 +91,7 @@ const els = {
   shooterRow: document.getElementById("shooterRow"),
   fromRow: document.getElementById("fromRow"),
   toRow: document.getElementById("toRow"),
+  shotTypeRow: document.getElementById("shotTypeRow"),
   resultRow: document.getElementById("resultRow"),
   penaltyPanel: document.getElementById("penaltyPanel"),
   penaltyRow: document.getElementById("penaltyRow"),
@@ -96,6 +99,8 @@ const els = {
   extraFieldsContainer: document.getElementById("extraFieldsContainer"),
 
   undoShot: document.getElementById("undoShot"),
+  switchSideInline: document.getElementById("switchSideInline"),
+  markTimeout: document.getElementById("markTimeout"),
   shotTableBody: document.getElementById("shotTableBody"),
   shotCount: document.getElementById("shotCount"),
   resetInput: document.getElementById("resetInput"),
@@ -124,6 +129,8 @@ function bindEvents() {
   els.switchTeam.addEventListener("click", onSwitchTeam);
   els.toggleSubs.addEventListener("click", onToggleSubs);
   els.markHalfTime.addEventListener("click", onMarkHalfTime);
+  els.switchSideInline.addEventListener("click", onSwitchTeam);
+  els.markTimeout.addEventListener("click", onMarkTimeout);
   els.subTeam.addEventListener("change", renderSubOptions);
   els.subOff.addEventListener("change", renderSubOptions);
   els.applySub.addEventListener("click", onApplySubstitution);
@@ -201,6 +208,7 @@ function buildInputRows() {
   buildShooterRow();
   buildFromRow();
   buildToRow();
+  buildShotTypeRow();
   buildResultRow();
   buildPenaltyRow();
 }
@@ -215,6 +223,10 @@ function buildFromRow() {
 
 function buildToRow() {
   refreshRowButtons(els.toRow, ["1", "2", "3", "4", "5", "6", "7", "Out"], "to", onSelectTo);
+}
+
+function buildShotTypeRow() {
+  refreshRowButtons(els.shotTypeRow, SHOT_TYPE_OPTIONS, "shotType", onSelectShotType);
 }
 
 function buildResultRow() {
@@ -316,6 +328,11 @@ function onSelectTo(value) {
   onControlUpdate();
 }
 
+function onSelectShotType(value) {
+  state.controls.shotType = value;
+  onControlUpdate();
+}
+
 function onSelectResult(value) {
   state.controls.result = value;
   if (value !== "Penalty") {
@@ -363,6 +380,7 @@ function submitShot() {
     from: state.controls.shotFrom,
     to: state.controls.shotTo,
     path: `${state.controls.shotFrom}->${state.controls.shotTo}`,
+    shotType: state.controls.shotType || "",
     result: state.controls.result,
     penaltyType: state.controls.result === "Penalty" ? state.controls.penaltyType : "",
     extras: { ...state.controls.extras },
@@ -378,6 +396,14 @@ function submitShot() {
 }
 
 function onMarkHalfTime() {
+  addMarkerEntry("Half Time");
+}
+
+function onMarkTimeout() {
+  addMarkerEntry("Timeout");
+}
+
+function addMarkerEntry(label) {
   state.shots.push({
     id: crypto.randomUUID(),
     index: state.shots.length + 1,
@@ -387,7 +413,8 @@ function onMarkHalfTime() {
     from: null,
     to: null,
     path: "-",
-    result: "Half Time",
+    shotType: "",
+    result: label,
     penaltyType: "",
     extras: buildEmptyExtras(),
     createdAt: new Date().toISOString(),
@@ -404,6 +431,7 @@ function resetShotControls() {
   state.controls.shooterIndex = null;
   state.controls.shotFrom = null;
   state.controls.shotTo = null;
+  state.controls.shotType = null;
   state.controls.result = null;
   state.controls.penaltyType = null;
   state.controls.extras = buildEmptyExtras();
@@ -599,6 +627,7 @@ function renderShotRows() {
   highlightSelection(els.shooterRow, state.controls.shooterIndex, "index");
   highlightSelection(els.fromRow, state.controls.shotFrom, "value");
   highlightSelection(els.toRow, state.controls.shotTo, "value");
+  highlightSelection(els.shotTypeRow, state.controls.shotType, "value");
   highlightSelection(els.resultRow, state.controls.result, "value");
   highlightSelection(els.penaltyRow, state.controls.penaltyType, "value");
   els.penaltyPanel.classList.toggle("hidden", state.controls.result !== "Penalty");
@@ -631,7 +660,7 @@ function renderShots() {
       return `
         <tr>
           <td>${shot.index}</td>
-          <td colspan="5"><strong>${escapeHtml(shot.result || "Marker")}</strong></td>
+          <td colspan="6"><strong>${escapeHtml(shot.result || "Marker")}</strong></td>
           <td>${new Date(shot.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</td>
         </tr>
       `;
@@ -644,6 +673,7 @@ function renderShots() {
         <td>${escapeHtml(teamLabel(shot.team))}</td>
         <td>${escapeHtml(shot.player || "-")}</td>
         <td>${escapeHtml(shot.path || "-")}</td>
+        <td>${escapeHtml(shot.shotType || "-")}</td>
         <td>${escapeHtml(shot.result || "-")}</td>
         <td>${escapeHtml(shot.penaltyType || "-")}</td>
         <td>${escapeHtml(detailText)}</td>
@@ -651,7 +681,7 @@ function renderShots() {
     `;
   }).join("");
 
-  els.shotTableBody.innerHTML = rows || `<tr><td colspan="7">No shots recorded yet.</td></tr>`;
+  els.shotTableBody.innerHTML = rows || `<tr><td colspan="8">No shots recorded yet.</td></tr>`;
   els.shotCount.textContent = `${state.shots.length} entr${state.shots.length === 1 ? "y" : "ies"}`;
 }
 
@@ -715,7 +745,7 @@ function renderReportSummary() {
   lines.push(buildSimpleTable(["Penalty Type", "Count"], report.byPenaltyRows));
 
   lines.push("<h3>Shot List</h3>");
-  lines.push(buildSimpleTable(["#", "Team", "Player", "Path", "Result", "Penalty"], report.shotRows));
+  lines.push(buildSimpleTable(["#", "Team", "Player", "Path", "Shot Type", "Result", "Penalty"], report.shotRows));
 
   els.reportSummary.innerHTML = lines.join("\n");
 }
@@ -781,6 +811,7 @@ function buildReportData() {
       teamLabel(shot.team),
       shot.player || "-",
       shot.path || "-",
+      shot.shotType || "-",
       shot.result || "-",
       shot.penaltyType || "-",
     ]),
@@ -873,7 +904,7 @@ function generatePdfReport() {
 
   doc.autoTable({
     startY: doc.lastAutoTable.finalY + 14,
-    head: [["#", "Team", "Player", "Path", "Result", "Penalty"]],
+    head: [["#", "Team", "Player", "Path", "Shot Type", "Result", "Penalty"]],
     body: report.shotRows,
     theme: "grid",
     headStyles: { fillColor: [24, 74, 69] },
@@ -900,7 +931,7 @@ function exportCsv() {
   }
 
   const rows = [
-    ["index", "entryType", "team", "player", "from", "to", "path", "result", "penaltyType", ...EXTRA_FIELDS.map((f) => f.key), "createdAt"],
+    ["index", "entryType", "team", "player", "from", "to", "path", "shotType", "result", "penaltyType", ...EXTRA_FIELDS.map((f) => f.key), "createdAt"],
     ...state.shots.map((shot) => [
       shot.index,
       shot.entryType || "shot",
@@ -909,6 +940,7 @@ function exportCsv() {
       shot.from ?? "",
       shot.to ?? "",
       shot.path,
+      shot.shotType || "",
       shot.result,
       shot.penaltyType || "",
       ...EXTRA_FIELDS.map((f) => (shot.extras && shot.extras[f.key]) || ""),
@@ -929,7 +961,7 @@ function exportJson() {
     shots: state.shots,
     schema: {
       required: ["entryType", "team", "player", "from", "to", "result", "penaltyType"],
-      optional: EXTRA_FIELDS.map((f) => f.key),
+      optional: ["shotType", ...EXTRA_FIELDS.map((f) => f.key)],
     },
   };
 
@@ -1070,6 +1102,7 @@ function normalizeShots(shots) {
     from: typeof shot.from === "number" ? shot.from : Number(shot.from) || null,
     to: typeof shot.to === "number" ? shot.to : (String(shot.to || "") === "Out" ? "Out" : Number(shot.to) || null),
     path: shot.path || `${shot.from ?? "-"}->${shot.to ?? "-"}`,
+    shotType: SHOT_TYPE_OPTIONS.includes(shot.shotType) ? shot.shotType : "",
     result: shot.entryType === "marker" ? (shot.result || "Marker") : (RESULT_OPTIONS.includes(shot.result) ? shot.result : "Blocked"),
     penaltyType: shot.penaltyType || "",
     extras: normalizeExtras(shot.extras),
