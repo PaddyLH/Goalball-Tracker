@@ -27,6 +27,17 @@ Set these in repository Settings -> Secrets and variables -> Actions -> Variable
 
 The workflow file is [.github/workflows/pages.yml](.github/workflows/pages.yml).
 
+### Troubleshooting GitHub Pages action errors
+
+If Actions shows `Resource not accessible by integration` on `configure-pages`:
+
+1. Open repository Settings -> Actions -> General.
+2. Under Workflow permissions, select Read and write permissions.
+3. Open Settings -> Pages and set Source to GitHub Actions.
+4. Re-run the failed workflow.
+
+If this is an organization repository, an admin policy may block Pages creation from Actions. In that case, enable Pages manually once, then deployments will work.
+
 ### iPad install steps
 
 1. Open the Pages URL in Safari.
