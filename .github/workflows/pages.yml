@@ -1,0 +1,71 @@
+name: Deploy static site to Pages
+
+on:
+  push:
+    branches: ["main", "master"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      publish_dir: ${{ steps.config.outputs.publish_dir }}
+    env:
+      PAGES_PUBLISH_DIR: ${{ vars.PAGES_PUBLISH_DIR }}
+      PAGES_CUSTOM_DOMAIN: ${{ vars.PAGES_CUSTOM_DOMAIN }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Resolve deploy config
+        id: config
+        shell: bash
+        run: |
+          set -euo pipefail
+          PUBLISH_DIR="${PAGES_PUBLISH_DIR:-.}"
+
+          if [ ! -d "$PUBLISH_DIR" ]; then
+            echo "Configured PAGES_PUBLISH_DIR does not exist: $PUBLISH_DIR"
+            exit 1
+          fi
+
+          mkdir -p _site
+          cp -R "$PUBLISH_DIR"/. _site/
+
+          # Ensure Pages serves static assets exactly as-is.
+          touch _site/.nojekyll
+
+          if [ -n "${PAGES_CUSTOM_DOMAIN:-}" ]; then
+            printf "%s\n" "$PAGES_CUSTOM_DOMAIN" > _site/CNAME
+            echo "Using custom domain: $PAGES_CUSTOM_DOMAIN"
+          fi
+
+          echo "publish_dir=_site" >> "$GITHUB_OUTPUT"
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ${{ steps.config.outputs.publish_dir }}
+
+  deploy:
+    needs: build
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

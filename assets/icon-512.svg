@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Live Shot Tracker icon">
+  <rect width="512" height="512" rx="108" fill="#184a45"/>
+  <circle cx="256" cy="256" r="156" fill="#f2efe7"/>
+  <circle cx="256" cy="256" r="102" fill="#2c6e63"/>
+  <path d="M256 118v52M256 342v52M118 256h52M342 256h52" stroke="#f2efe7" stroke-width="24" stroke-linecap="round"/>
+  <circle cx="256" cy="256" r="28" fill="#f2efe7"/>
+</svg>

@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#184a45" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="ShotTracker" />
+  <meta name="description" content="Offline-first live shot tracker for coaches." />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="assets/icon-192.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="assets/icon-192.svg" />
+  <link rel="stylesheet" href="styles.css" />
+  <title>Live Shot Tracker</title>
+</head>
+<body>
+  <header class="app-header">
+    <div>
+      <p class="eyebrow">PWA • Offline-First</p>
+      <h1>Live Shot Tracker</h1>
+      <p class="sub">Track every shot live with one-tap path buttons and export at the final whistle.</p>
+      <p id="iosInstallHint" class="hint hidden">On iPad: tap Share, then Add to Home Screen.</p>
+    </div>
+    <button id="installBtn" class="outline hidden" type="button">Install App</button>
+  </header>
+
+  <main class="layout">
+    <section id="setupScreen" class="card start-screen">
+      <h2>Start Game</h2>
+      <p class="sub">Enter game details once, then switch to a clean live-tracking screen.</p>
+      <form id="startForm" class="grid two">
+        <label>
+          Sport
+          <input id="sport" type="text" placeholder="Goalball" required />
+        </label>
+        <label>
+          Team Name
+          <input id="teamName" type="text" placeholder="My Team" required />
+        </label>
+        <label>
+          Opponent
+          <input id="opponent" type="text" placeholder="Opponent" required />
+        </label>
+        <label>
+          Venue (optional)
+          <input id="venue" type="text" placeholder="Home court" />
+        </label>
+        <label>
+          Coach / Analyst (optional)
+          <input id="analyst" type="text" placeholder="Name" />
+        </label>
+        <label>
+          Match Label (optional)
+          <input id="matchLabel" type="text" placeholder="Round 4" />
+        </label>
+        <div class="full-width actions">
+          <button id="startGame" type="submit">Start Live Tracking</button>
+        </div>
+      </form>
+    </section>
+
+    <section id="liveScreen" class="hidden">
+      <section class="card compact-header">
+        <div>
+          <h2 id="matchTitle">Match</h2>
+          <p class="sub" id="matchMeta">Ready</p>
+        </div>
+        <div class="timer-wrap compact">
+          <div>
+            <p class="timer-label">Game Clock</p>
+            <p id="timer" class="timer">00:00</p>
+          </div>
+          <div class="timer-actions">
+            <button id="startTimer" type="button">Start</button>
+            <button id="pauseTimer" type="button" class="outline">Pause</button>
+            <button id="resetTimer" type="button" class="danger">Reset</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="card quick-controls">
+        <h2>Quick Settings</h2>
+        <div class="grid two">
+          <label>
+            Team
+            <select id="shotTeam">
+              <option value="our">Our Team</option>
+              <option value="opponent">Opponent</option>
+            </select>
+          </label>
+          <label>
+            Result
+            <select id="result">
+              <option value="Goal">Goal</option>
+              <option value="Saved">Saved</option>
+              <option value="Blocked">Blocked</option>
+              <option value="Missed">Missed</option>
+              <option value="Post/Bar">Post/Bar</option>
+              <option value="Turnover">Turnover</option>
+            </select>
+          </label>
+          <label>
+            Player (optional)
+            <input id="player" type="text" placeholder="#7 or Name" />
+          </label>
+          <div class="actions controls-end">
+            <button id="undoShot" type="button" class="outline">Undo Last</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="table-head">
+          <h2>Shot Path Buttons (1-7 to 1-7)</h2>
+          <p>Tap once per shot</p>
+        </div>
+        <div id="shotGrid" class="shot-grid" aria-label="Shot path button grid"></div>
+      </section>
+
+      <section class="card">
+        <h2>Live Totals</h2>
+        <div class="stats" id="stats"></div>
+      </section>
+
+      <section class="card">
+        <div class="table-head">
+          <h2>Shot Log</h2>
+          <p id="shotCount">0 shots</p>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Time</th>
+                <th>Team</th>
+                <th>Player</th>
+                <th>Path</th>
+                <th>Result</th>
+              </tr>
+            </thead>
+            <tbody id="shotTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="card app-footer">
+        <div class="export-actions">
+          <button id="exportCsv" type="button">Export CSV</button>
+          <button id="exportJson" type="button" class="outline">Export JSON</button>
+          <button id="newGame" type="button" class="danger">New Game</button>
+        </div>
+        <p class="hint">Everything is saved locally on this device. Works offline once loaded.</p>
+      </section>
+    </section>
+  </main>
+
+  <template id="statCardTemplate">
+    <article class="stat-card">
+      <h3></h3>
+      <p class="big"></p>
+      <p class="small"></p>
+    </article>
+  </template>
+
+  <script src="app.js" defer></script>
+</body>
+</html>
